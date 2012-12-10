@@ -1,0 +1,71 @@
+package org.infinispan.query.impl;
+
+import org.hibernate.search.query.engine.spi.DocumentExtractor;
+import org.hibernate.search.query.engine.spi.EntityInfo;
+import org.hibernate.search.query.engine.spi.HSQuery;
+import org.infinispan.AdvancedCache;
+import org.infinispan.query.backend.KeyTransformationHandler;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Simple test for checking the Iterator Initialization with wrong fetch size.
+ *
+ * @author Anna Manukyan
+ */
+@Test(groups = "functional", testName = "query.impl.InvalidIteratorTest")
+public class InvalidIteratorTest {
+   private List<EntityInfo> entityInfos = new ArrayList<EntityInfo>();
+   private AdvancedCache<String, String> cache;
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testLazyIteratorInitWithInvalidFetchSize() throws IOException {
+      DocumentExtractor extractor = mock(DocumentExtractor.class);
+      when(extractor.extract(anyInt())).thenAnswer(new Answer<EntityInfo>() {
+         @Override
+         public EntityInfo answer(InvocationOnMock invocation) throws Throwable {
+            int index = (Integer) invocation.getArguments()[0];
+            return entityInfos.get(index);
+         }
+      });
+
+      HSQuery hsQuery = mock(HSQuery.class);
+      cache = mock(AdvancedCache.class);
+      when(hsQuery.queryDocumentExtractor()).thenReturn(extractor);
+      when(hsQuery.queryResultSize()).thenReturn(entityInfos.size());
+
+      LazyIterator iterator = new LazyIterator(hsQuery, new EntityLoader(cache, new KeyTransformationHandler()), getFetchSize());
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testEagerIteratorInitWithInvalidFetchSize() throws IOException {
+      DocumentExtractor extractor = mock(DocumentExtractor.class);
+      when(extractor.extract(anyInt())).thenAnswer(new Answer<EntityInfo>() {
+         @Override
+         public EntityInfo answer(InvocationOnMock invocation) throws Throwable {
+            int index = (Integer) invocation.getArguments()[0];
+            return entityInfos.get(index);
+         }
+      });
+
+      HSQuery hsQuery = mock(HSQuery.class);
+      cache = mock(AdvancedCache.class);
+      when(hsQuery.queryDocumentExtractor()).thenReturn(extractor);
+      when(hsQuery.queryResultSize()).thenReturn(entityInfos.size());
+
+      EagerIterator iterator = new EagerIterator(entityInfos, new EntityLoader(cache, new KeyTransformationHandler()), getFetchSize());
+   }
+
+   private int getFetchSize() {
+      return 0;
+   }
+}

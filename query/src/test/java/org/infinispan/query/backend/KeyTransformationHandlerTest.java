@@ -24,6 +24,8 @@ package org.infinispan.query.backend;
 
 import java.util.UUID;
 
+import org.infinispan.CacheException;
+import org.infinispan.query.Transformer;
 import org.infinispan.query.test.CustomKey;
 import org.infinispan.query.test.CustomKey2;
 import org.infinispan.query.test.CustomKey3;
@@ -127,6 +129,20 @@ public class KeyTransformationHandlerTest {
       assert key.equals(randomUUID);
    }
 
+   @Test(expectedExceptions = CacheException.class)
+   public void testStringToUnknownKey() {
+      ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+      key = keyTransformationHandler.stringToKey("Z:someKey", contextClassLoader);
+   }
+
+   @Test(expectedExceptions = CacheException.class)
+   public void testStringToKeyWithInvalidTransformer() {
+      ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+      key = keyTransformationHandler.stringToKey("T:org.infinispan.SomeTransformer:key1", contextClassLoader);
+   }
+
    public void testStringToKeyWithCustomTransformable() {
       CustomKey customKey = new CustomKey(88, 8800, 12889976);
       String strRep = keyTransformationHandler.keyToString(customKey);
@@ -152,6 +168,32 @@ public class KeyTransformationHandlerTest {
       CustomKey3 key = new CustomKey3("str");
       String string = keyTransformationHandler.keyToString(key);
       key.equals(keyTransformationHandler.stringToKey(string, Thread.currentThread().getContextClassLoader()));
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testKeyToStringWithExceptionalTransformer() {
+      keyTransformationHandler.registerTransformer(CustomKey2.class, ExceptionThrowingTransformer.class);
+
+      CustomKey2 key = new CustomKey2(1, 2, 3);
+      String val = keyTransformationHandler.keyToString(key);
+   }
+
+   public class ExceptionThrowingTransformer implements Transformer {
+      public ExceptionThrowingTransformer() {
+         System.out.println("in constructor");
+         //simulating exception
+         int a = 4 / 0;
+      }
+
+      @Override
+      public Object fromString(String s) {
+         return null;
+      }
+
+      @Override
+      public String toString(Object customType) {
+         return null;
+      }
    }
 
 }
