@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
  *
  * @author Anna Manukyan
  */
-@Test(groups = "functional", enabled = false, testName = "distexec.DistributedExecutorExecutionPolicyTest")
+@Test(groups = "functional", testName = "distexec.DistributedExecutorExecutionPolicyTest")
 public class DistributedExecutorExecutionPolicyTest extends MultipleCacheManagersTest {
 
    public static final String CACHE_NAME = "TestCache";
