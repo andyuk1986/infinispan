@@ -514,7 +514,7 @@ public class LocalDistributedExecutorTest extends MultipleCacheManagersTest {
       }
    }
 
-   static class SimpleDistributedCallable implements DistributedCallable<String, String, Boolean>,
+   public static class SimpleDistributedCallable implements DistributedCallable<String, String, Boolean>,
             Serializable {
 
       /** The serialVersionUID */
