@@ -15,6 +15,6 @@ public class SimpleBookSearchTest extends BookSearchTest {
    @Override
    protected void createCacheManagers() {
       ConfigurationBuilder builder = getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, true);
-      createClusteredCaches(4, "bookSearch" ,builder);
+      createClusteredCaches(4, CACHE_NAME ,builder);
    }
 }

@@ -1,24 +1,23 @@
-package org.infinispan.distexec;
+package org.infinispan.distexec.mapreduce;
 
-import org.infinispan.config.Configuration;
-import org.infinispan.config.GlobalConfiguration;
+import org.infinispan.Cache;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.remoting.transport.TopologyAwareAddress;
+import org.infinispan.test.CacheManagerCallable;
+import org.infinispan.test.TestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.annotations.Test;
 
+import static org.infinispan.test.TestingUtil.withCacheManager;
+
 /**
- * Tests are added for verifying the Distributed Executors for Topology Aware Nodes.
+ * Tests verifying the Map Reduce execution for the Topology Aware nodes.
  *
  * @author Anna Manukyan
  */
-@Test(groups = "functional", testName = "distexec.DistributedExecutorWithTopologyAwareNodesTest")
-public class DistributedExecutorWithTopologyAwareNodesTest extends DistributedExecutorTest {
-
-   private String CACHE_NAME = "DistributedExecutorWithTopologyAwareNodesTest";
+public class TopologyAwareTwoNodesMapReduceTest extends SimpleTwoNodesMapReduceTest {
 
    @Override
    protected void createCacheManagers() throws Throwable {
@@ -30,7 +29,7 @@ public class DistributedExecutorWithTopologyAwareNodesTest extends DistributedEx
 
       EmbeddedCacheManager cm1 = TestCacheManagerFactory.createClusteredCacheManager(globalConfigurationBuilder,
                                                                                      builder);
-      cm1.defineConfiguration(CACHE_NAME, builder.build());
+      cm1.defineConfiguration(cacheName(), builder.build());
       cacheManagers.add(cm1);
 
       globalConfigurationBuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
@@ -38,13 +37,21 @@ public class DistributedExecutorWithTopologyAwareNodesTest extends DistributedEx
       EmbeddedCacheManager cm2 = TestCacheManagerFactory.createClusteredCacheManager(globalConfigurationBuilder,
                                                                                      builder);
 
-      cm2.defineConfiguration(CACHE_NAME, builder.build());
+      cm2.defineConfiguration(cacheName(), builder.build());
       cacheManagers.add(cm2);
 
       waitForClusterToForm();
    }
 
-   public CacheMode getCacheMode() {
-      return CacheMode.DIST_SYNC;
+   //Overriding these tests with empty body due to additional cache that is created during these tests.
+   @Override
+   public void testEnsureProperCacheState() throws Exception {
+
    }
+
+   @Override
+   public void testEnsureProperCacheStateMode() {
+
+   }
+
 }

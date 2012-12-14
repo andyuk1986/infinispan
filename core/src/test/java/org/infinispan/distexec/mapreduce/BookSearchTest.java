@@ -37,6 +37,8 @@ import org.testng.annotations.Test;
 @Test(groups = "functional", testName = "distexec.BookSearchTest")
 public abstract class BookSearchTest extends MultipleCacheManagersTest {
 
+   protected static final String CACHE_NAME = "bookSearch";
+
    @SuppressWarnings({ "rawtypes", "unchecked" })
    public void testBookSearch() {
       Cache c1 = cache(0, "bookSearch");

@@ -1,29 +1,21 @@
-package org.infinispan.distexec;
+package org.infinispan.distexec.mapreduce;
 
-import org.infinispan.config.Configuration;
-import org.infinispan.config.GlobalConfiguration;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.remoting.transport.TopologyAwareAddress;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
-import org.testng.annotations.Test;
 
 /**
- * Tests are added for verifying the Distributed Executors for Topology Aware Nodes.
+ * Tests verifying BookSearch Map reduce tests on Topology Aware nodes.
  *
  * @author Anna Manukyan
  */
-@Test(groups = "functional", testName = "distexec.DistributedExecutorWithTopologyAwareNodesTest")
-public class DistributedExecutorWithTopologyAwareNodesTest extends DistributedExecutorTest {
-
-   private String CACHE_NAME = "DistributedExecutorWithTopologyAwareNodesTest";
-
+public class BookSearchOnTopologyAwareNodesTest extends BookSearchTest {
    @Override
    protected void createCacheManagers() throws Throwable {
       ConfigurationBuilder builder =
-            getDefaultClusteredCacheConfig(getCacheMode(), false);
+            getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false);
 
       GlobalConfigurationBuilder globalConfigurationBuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
       globalConfigurationBuilder.transport().machineId("a").rackId("b").siteId("test1");
@@ -42,9 +34,5 @@ public class DistributedExecutorWithTopologyAwareNodesTest extends DistributedEx
       cacheManagers.add(cm2);
 
       waitForClusterToForm();
-   }
-
-   public CacheMode getCacheMode() {
-      return CacheMode.DIST_SYNC;
    }
 }

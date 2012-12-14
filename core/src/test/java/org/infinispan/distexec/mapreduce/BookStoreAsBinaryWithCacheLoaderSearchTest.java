@@ -28,7 +28,7 @@ public class BookStoreAsBinaryWithCacheLoaderSearchTest extends BookSearchTest {
       builder.loaders().passivation(true).addStore().cacheStore(new DummyInMemoryCacheStore(getClass().getSimpleName()));
       builder.storeAsBinary().enable();
 
-      createClusteredCaches(4, "bookSearch", builder);
+      createClusteredCaches(4, CACHE_NAME, builder);
    }
 
 }

@@ -1,18 +1,15 @@
 package org.infinispan.distexec;
 
 import org.infinispan.Cache;
-import org.infinispan.configuration.cache.Configuration;
-import org.infinispan.config.GlobalConfiguration;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.TopologyAwareAddress;
 import org.infinispan.test.MultipleCacheManagersTest;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.annotations.Test;
 
-import java.io.Serializable;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -21,7 +18,7 @@ import java.util.concurrent.Future;
  *
  * @author Anna Manukyan
  */
-@Test(groups = "functional", testName = "distexec.DistributedExecutorExecutionPolicyTest")
+@Test(groups = "functional", enabled = false, testName = "distexec.DistributedExecutorExecutionPolicyTest")
 public class DistributedExecutorExecutionPolicyTest extends MultipleCacheManagersTest {
 
    public static final String CACHE_NAME = "TestCache";
@@ -34,15 +31,15 @@ public class DistributedExecutorExecutionPolicyTest extends MultipleCacheManager
    protected void createCacheManagers() throws Throwable {
    }
 
-   private EmbeddedCacheManager createCacheManager(int counter, int siteId, int machineId, int rankId) {
+   private EmbeddedCacheManager createCacheManager(int counter, int siteId, int machineId, int rackId) {
       ConfigurationBuilder builder = getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false);
 
-      GlobalConfiguration gc1 = GlobalConfiguration.getClusteredDefault();
-      updatedSiteInfo(gc1, "s" + (siteId > 0 ? siteId : counter), "r" + (rankId > 0 ? rankId : counter),
-                      "m" + (machineId > 0 ? machineId : counter));
-      EmbeddedCacheManager cm1 = TestCacheManagerFactory.createCacheManager(gc1, getDefaultClusteredConfig(
-            org.infinispan.config.Configuration.CacheMode.DIST_SYNC));
+      GlobalConfigurationBuilder globalConfigurationBuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
+      globalConfigurationBuilder.transport().machineId("m" + (machineId > 0 ? machineId : counter))
+            .rackId("r" + (rackId > 0 ? rackId : counter)).siteId("s" + (siteId > 0 ? siteId : counter));
 
+      EmbeddedCacheManager cm1 = TestCacheManagerFactory.createClusteredCacheManager(globalConfigurationBuilder,
+                                                                                     builder);
       cm1.defineConfiguration(CACHE_NAME, builder.build());
 
       return cm1;
@@ -122,47 +119,12 @@ public class DistributedExecutorExecutionPolicyTest extends MultipleCacheManager
       DistributedExecutorService des = new DefaultExecutorService(cache1);
 
       //the same using DistributedTask API
-      DistributedTaskBuilder<Boolean> taskBuilder = des.createDistributedTaskBuilder(new SimpleDistributedCallable(true));
+      DistributedTaskBuilder<Boolean> taskBuilder = des.createDistributedTaskBuilder(new LocalDistributedExecutorTest.SimpleDistributedCallable(true));
       taskBuilder.executionPolicy(policy);
 
       DistributedTask<Boolean> distributedTask = taskBuilder.build();
       Future<Boolean> future = des.submit(distributedTask, new String[] {"key1", "key6"});
 
       assert future.get();
-   }
-
-   private void updatedSiteInfo(GlobalConfiguration gc1, String s0, String r0, String m0) {
-      gc1.setSiteId(s0);
-      gc1.setRackId(r0);
-      gc1.setMachineId(m0);
-   }
-
-   static class SimpleDistributedCallable implements DistributedCallable<String, String, Boolean>,
-                                                     Serializable {
-
-      /** The serialVersionUID */
-      private static final long serialVersionUID = 623845442163221832L;
-      private boolean invokedProperly = false;
-      private final boolean hasKeys;
-
-      public SimpleDistributedCallable(boolean hasKeys) {
-         this.hasKeys = hasKeys;
-      }
-
-      @Override
-      public Boolean call() throws Exception {
-         return invokedProperly;
-      }
-
-      @Override
-      public void setEnvironment(Cache<String, String> cache, Set<String> inputKeys) {
-         boolean keysProperlySet = hasKeys ? inputKeys != null && !inputKeys.isEmpty()
-               : inputKeys != null && inputKeys.isEmpty();
-         invokedProperly = cache != null && keysProperlySet;
-      }
-
-      public boolean validlyInvoked() {
-         return invokedProperly;
-      }
    }
 }
