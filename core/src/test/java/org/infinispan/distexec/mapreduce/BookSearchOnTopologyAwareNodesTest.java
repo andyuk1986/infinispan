@@ -17,7 +17,7 @@ public class BookSearchOnTopologyAwareNodesTest extends BookSearchTest {
    @Override
    protected void createCacheManagers() throws Throwable {
       ConfigurationBuilder builder =
-            getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false);
+            getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, true);
 
       GlobalConfigurationBuilder globalConfigurationBuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
       globalConfigurationBuilder.transport().machineId("a").rackId("b").siteId("test1");
@@ -28,7 +28,7 @@ public class BookSearchOnTopologyAwareNodesTest extends BookSearchTest {
       cacheManagers.add(cm1);
 
       globalConfigurationBuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
-      globalConfigurationBuilder.transport().machineId("b").rackId("b").siteId("test2");
+      globalConfigurationBuilder.transport().machineId("c").rackId("d").siteId("test2");
       EmbeddedCacheManager cm2 = TestCacheManagerFactory.createClusteredCacheManager(globalConfigurationBuilder,
                                                                                      builder);
 
@@ -36,5 +36,9 @@ public class BookSearchOnTopologyAwareNodesTest extends BookSearchTest {
       cacheManagers.add(cm2);
 
       waitForClusterToForm();
+   }
+
+   public int getNumberOfNodes() {
+      return 2;
    }
 }

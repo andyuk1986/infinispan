@@ -41,7 +41,7 @@ public abstract class BookSearchTest extends MultipleCacheManagersTest {
 
    @SuppressWarnings({ "rawtypes", "unchecked" })
    public void testBookSearch() {
-      Cache c1 = cache(0, "bookSearch");
+      Cache c1 = cache(0, CACHE_NAME);
       c1.put("1",
                new Book("Seam in Action",
                         "Dan Allen",
@@ -54,14 +54,18 @@ public abstract class BookSearchTest extends MultipleCacheManagersTest {
                new Book("Metaprogramming Ruby",
                         "Paolo Perrotta",
                         "The Pragmatic Programmers"));
-      for (int i = 0; i < 4; i++) {
-         verifySearch( cache( i,  "bookSearch" ) );
+      for (int i = 0; i < getNumberOfNodes(); i++) {
+         verifySearch( cache( i,  CACHE_NAME ) );
       }
+   }
+
+   protected int getNumberOfNodes() {
+      return 4;
    }
 
    @SuppressWarnings({ "rawtypes", "unchecked" })   
    private void verifySearch(Cache cache) {
-      
+
       MapReduceTask<String, Book, String, Book> queryTask = new MapReduceTask<String, Book, String, Book>(cache);
 
       queryTask

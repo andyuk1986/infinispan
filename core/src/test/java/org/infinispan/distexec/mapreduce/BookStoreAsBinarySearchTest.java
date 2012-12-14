@@ -20,7 +20,7 @@ public class BookStoreAsBinarySearchTest extends BookSearchTest {
       //Verification for ISPN-2138 - the following exception should not appear:
       //java.lang.ClassCastException: org.infinispan.marshall.MarshalledValue cannot be cast to org.infinispan.distexec.mapreduce.Book
       builder.storeAsBinary().enable();
-      createClusteredCaches(4, CACHE_NAME, builder);
+      createClusteredCaches(getNumberOfNodes(), CACHE_NAME, builder);
    }
 
 }
