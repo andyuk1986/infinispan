@@ -5,12 +5,14 @@ import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
+import org.testng.annotations.Test;
 
 /**
  * Tests verifying BookSearch Map reduce tests on Topology Aware nodes.
  *
  * @author Anna Manukyan
  */
+@Test(groups = "functional", testName = "distexec.BookSearchOnTopologyAwareNodesTest")
 public class BookSearchOnTopologyAwareNodesTest extends BookSearchTest {
    @Override
    protected void createCacheManagers() throws Throwable {

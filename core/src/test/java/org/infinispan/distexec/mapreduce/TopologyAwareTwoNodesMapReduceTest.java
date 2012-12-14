@@ -1,22 +1,17 @@
 package org.infinispan.distexec.mapreduce;
 
-import org.infinispan.Cache;
-import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.test.CacheManagerCallable;
-import org.infinispan.test.TestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.annotations.Test;
-
-import static org.infinispan.test.TestingUtil.withCacheManager;
 
 /**
  * Tests verifying the Map Reduce execution for the Topology Aware nodes.
  *
  * @author Anna Manukyan
  */
+@Test(groups = "functional", testName = "distexec.TopologyAwareTwoNodesMapReduceTest")
 public class TopologyAwareTwoNodesMapReduceTest extends SimpleTwoNodesMapReduceTest {
 
    @Override
