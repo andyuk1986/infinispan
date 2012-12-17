@@ -30,6 +30,7 @@ import org.infinispan.query.test.CustomKey;
 import org.infinispan.query.test.CustomKey2;
 import org.infinispan.query.test.CustomKey3;
 import org.infinispan.query.test.CustomKey3Transformer;
+import org.infinispan.query.test.NonSerializableKey;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -175,6 +176,12 @@ public class KeyTransformationHandlerTest {
       keyTransformationHandler.registerTransformer(CustomKey2.class, ExceptionThrowingTransformer.class);
 
       CustomKey2 key = new CustomKey2(1, 2, 3);
+      String val = keyTransformationHandler.keyToString(key);
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testKeyToStringWithDefaultTransformerForNonSerializableObject() {
+      NonSerializableKey key = new NonSerializableKey("test");
       String val = keyTransformationHandler.keyToString(key);
    }
 

@@ -22,12 +22,6 @@
  */
 package org.infinispan.query.blackbox;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-
 import junit.framework.Assert;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
@@ -44,6 +38,7 @@ import org.hibernate.search.engine.spi.EntityIndexBinder;
 import org.hibernate.search.engine.spi.SearchFactoryImplementor;
 import org.hibernate.search.spi.SearchFactoryIntegrator;
 import org.infinispan.Cache;
+import org.infinispan.CacheImpl;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.factories.ComponentRegistry;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -61,9 +56,17 @@ import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
 import static java.util.Arrays.asList;
 import static org.infinispan.query.helper.TestQueryHelperFactory.createCacheQuery;
 import static org.infinispan.query.helper.TestQueryHelperFactory.createQueryParser;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Test(groups = "functional", testName = "query.blackbox.LocalCacheTest")
 public class LocalCacheTest extends SingleCacheManagerTest {
@@ -440,6 +443,31 @@ public class LocalCacheTest extends SingleCacheManagerTest {
       }
 
       AssertJUnit.assertEquals(3, counter);
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testSearchWithWrongCache() throws ParseException {
+      Cache cache = mock(CacheImpl.class);
+      when(cache.getAdvancedCache()).thenReturn(null);
+
+      SearchManager manager = Search.getSearchManager(cache);
+   }
+
+   //Another test just for covering Search.java instantiation, although it is unnecessary. As well as covering the
+   //valueOf() method of FetchMode, again just for adding coverage.
+   public void testSearchManagerWithInstantiation() throws ParseException {
+      loadTestingData();
+      queryParser = createQueryParser("blurb");
+      Query luceneQuery = queryParser.parse("playing");
+
+      Search search = new Search();
+      CacheQuery cacheQuery = search.getSearchManager(cache).getQuery(luceneQuery);
+
+      ResultIterator found = cacheQuery.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.valueOf("LAZY")));
+
+      assert found.hasNext();
+      found.next();
+      assert !found.hasNext();
    }
 
    public void testGetResultSize() throws ParseException {
