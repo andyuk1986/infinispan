@@ -80,6 +80,13 @@ public class DistributedMassIndexingTest extends MultipleCacheManagersTest {
       //re-sync
       rebuildIndexes();
       verifyFindsCar(2, "megane");
+
+      //Overwriting the key with String value.
+      caches.get(0).getAdvancedCache().withFlags(Flag.SKIP_INDEXING).put(key("F1NUM"), "megane");
+      verifyFindsCar(2, "megane");
+
+      rebuildIndexes();
+      verifyFindsCar(1, "megane");
    }
 
    private Object key(String keyId) {

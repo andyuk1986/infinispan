@@ -39,6 +39,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.context.Flag;
 import org.infinispan.interceptors.base.CommandInterceptor;
 import org.infinispan.query.CacheQuery;
 import org.infinispan.query.FetchOptions;
@@ -83,7 +84,7 @@ public class ClusteredCacheTest extends MultipleCacheManagersTest {
 
    @Override
    protected void createCacheManagers() throws Throwable {
-      ConfigurationBuilder cacheCfg = getDefaultClusteredCacheConfig(CacheMode.REPL_SYNC, transactionsEnabled());
+      ConfigurationBuilder cacheCfg = getDefaultClusteredCacheConfig(getCacheMode(), transactionsEnabled());
       cacheCfg.indexing()
          .enable()
          .indexLocalOnly(false)
@@ -93,6 +94,10 @@ public class ClusteredCacheTest extends MultipleCacheManagersTest {
       List<Cache<String, Person>> caches = createClusteredCaches(2, cacheCfg);
       cache1 = caches.get(0);
       cache2 = caches.get(1);
+   }
+
+   public CacheMode getCacheMode() {
+      return CacheMode.REPL_SYNC;
    }
 
    private void prepareTestedObjects() {
@@ -109,7 +114,7 @@ public class ClusteredCacheTest extends MultipleCacheManagersTest {
       person3.setBlurb("Eats cheese");
    }
 
-   private void prepareTestData() throws Exception {
+   protected void prepareTestData() throws Exception {
       prepareTestedObjects();
 
       TransactionManager transactionManager = null;
@@ -209,6 +214,43 @@ public class ClusteredCacheTest extends MultipleCacheManagersTest {
       assert found.contains(person2);
       assert found.contains(person3);
       assert found.contains(person4) : "This should now contain object person4";
+   }
+
+   public void testAddedWithFlags() throws Exception {
+      prepareTestData();
+      queryParser = createQueryParser("blurb");
+
+      luceneQuery = queryParser.parse("eats");
+      cacheQuery = Search.getSearchManager(cache2).getQuery(luceneQuery);
+      List<Object> found = cacheQuery.list();
+
+      assert found.size() == 2 : "Size of list should be 2";
+      assert found.contains(person2);
+      assert found.contains(person3);
+
+      person4 = new Person();
+      person4.setName("Mighty Goat");
+      person4.setBlurb("Also eats grass");
+
+      cache1.getAdvancedCache().withFlags(Flag.SKIP_INDEXING).put("mighty", person4);
+
+      luceneQuery = queryParser.parse("eats");
+      cacheQuery = Search.getSearchManager(cache2).getQuery(luceneQuery);
+      found = cacheQuery.list();
+
+      assert found.size() == 2 : "Size of list should be 2";
+      assert found.contains(person2);
+      assert found.contains(person3);
+      assert !found.contains(person4) : "This should now contain object person4";
+
+      luceneQuery = queryParser.parse("eats");
+      cacheQuery = Search.getSearchManager(cache1).getQuery(luceneQuery);
+      found = cacheQuery.list();
+
+      assert found.size() == 2 : "Size of list should be 2";
+      assert found.contains(person2);
+      assert found.contains(person3);
+      assert !found.contains(person4) : "This should now contain object person4";
    }
 
    public void testRemoved() throws Exception {
