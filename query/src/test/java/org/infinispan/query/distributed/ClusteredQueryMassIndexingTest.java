@@ -8,12 +8,14 @@ import org.infinispan.query.CacheQuery;
 import org.infinispan.query.Search;
 import org.infinispan.query.queries.faceting.Car;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import static org.infinispan.query.helper.TestQueryHelperFactory.createQueryParser;
 
 /**
  * Tests verifying that the Mass Indexing works for Clustered queries as well.
  */
+@Test(groups = "functional", testName = "query.distributed.ClusteredQueryMassIndexingTest")
 public class ClusteredQueryMassIndexingTest extends DistributedMassIndexingTest {
 
    protected void verifyFindsCar(Cache cache, int expectedCount, String carMake) {

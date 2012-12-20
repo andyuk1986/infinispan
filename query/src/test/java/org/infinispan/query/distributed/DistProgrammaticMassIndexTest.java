@@ -45,7 +45,7 @@ public class DistProgrammaticMassIndexTest extends DistributedMassIndexingTest {
             .enable()
             .indexLocalOnly(true)
             .addProperty("hibernate.search.default.indexmanager", "org.infinispan.query.indexmanager.InfinispanIndexManager")
-            .addProperty("default.directory_provider", "infinispan")
+            .addProperty("hibernate.search.default.directory_provider", "infinispan")
             .addProperty("hibernate.search.default.exclusive_index_use", "false")
             .addProperty("lucene_version", "LUCENE_36");
       List<Cache<String, Car>> cacheList = createClusteredCaches(NUM_NODES, cacheCfg);
