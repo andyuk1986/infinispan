@@ -52,6 +52,8 @@ public final class Deployments {
       // Figure out an IDE and Maven friendly path:
       String pomPath = new File(ideFriendlyPath).getAbsoluteFile().exists() ? ideFriendlyPath : "pom.xml";
 
+      System.out.println("POM PATH: " + pomPath);
+
       return ShrinkWrap.create(WebArchive.class, "test.war")
             .addAsWebInfResource(Deployments.class.getResource("/beans.xml"), "beans.xml")
             .addAsLibrary(
