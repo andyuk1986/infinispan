@@ -23,8 +23,10 @@
 package org.infinispan.distexec.mapreduce;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
@@ -56,9 +58,9 @@ import static org.infinispan.test.TestingUtil.withCacheManager;
  */
 @Test(groups = "functional", testName = "distexec.SimpleTwoNodesMapReduceTest")
 public class SimpleTwoNodesMapReduceTest extends BaseWordCountMapReduceTest {
-   
-   
-   private static AtomicInteger counter = null;
+   private static final String paramName = "param";
+
+   private static Map<String, AtomicInteger> statusMap = new Hashtable<String, AtomicInteger>();
 
    @Override
    protected void createCacheManagers() throws Throwable {
@@ -73,12 +75,10 @@ public class SimpleTwoNodesMapReduceTest extends BaseWordCountMapReduceTest {
     */
    @Test(expectedExceptions={CancellationException.class})
    public void testInvokeMapperCancellation() throws Exception {
-      //Initializing the counter in test itself, so that when each time the test runs, the execution is correct
-      // and is not based on previous values.
-      counter = new AtomicInteger();
+      final String uuid = UUID.randomUUID().toString();
 
       MapReduceTask<String, String, String, Integer> task = invokeMapReduce(null,
-               new LatchMapper(), new WordCountReducer());
+               new LatchMapper(uuid), new WordCountReducer());
       final Future<Map<String, Integer>> future = task.executeAsynchronously();
       Future<Boolean> cancelled = fork(new Callable<Boolean>() {
 
@@ -89,7 +89,8 @@ public class SimpleTwoNodesMapReduceTest extends BaseWordCountMapReduceTest {
                
                @Override
                public boolean isSatisfied() throws Exception {
-                  return counter.get() >= nodeCount();
+                  AtomicInteger paramCount = statusMap.get(paramName + uuid);
+                  return paramCount != null && paramCount.get() >= nodeCount();
                }
             });
             //...are ready to be canceled
@@ -122,14 +123,26 @@ public class SimpleTwoNodesMapReduceTest extends BaseWordCountMapReduceTest {
 
       /** The serialVersionUID */
       private static final long serialVersionUID = 2518908878377582179L;      
-      
+      private String randomUuid;
+
+      public LatchMapper(String randomUuid) {
+         this.randomUuid = randomUuid;
+      }
+
       @Override
       public void map(String key, String value, Collector<String, Integer> collector) {
          boolean interrupted = false;
          CountDownLatch latch = new CountDownLatch(1);
          try {
             if (!interrupted) {
-               counter.incrementAndGet();
+               AtomicInteger num = statusMap.get(paramName + randomUuid);
+               if(num == null) {
+                  num = new AtomicInteger();
+                  statusMap.put(paramName + randomUuid, num);
+               }
+
+               num.getAndIncrement();
+
                latch.await(5000, TimeUnit.MILLISECONDS);
             } else {
                interrupted = true;// already interrupted
