@@ -35,6 +35,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.DependencyResolvers;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenDependencyResolver;
+import org.jboss.shrinkwrap.resolver.impl.maven.SecurityActions;
 
 import java.io.File;
 
@@ -52,7 +53,8 @@ public final class Deployments {
       // Figure out an IDE and Maven friendly path:
       String pomPath = new File(ideFriendlyPath).getAbsoluteFile().exists() ? ideFriendlyPath : "pom.xml";
 
-      System.out.println("The path to Pom Is: " + pomPath);
+      System.out.println("The path to Pom Is: " + pomPath +
+                               "    The additional property: " + System.getProperty("user.home"));
 
       return ShrinkWrap.create(WebArchive.class, "test.war")
             .addAsWebInfResource(Deployments.class.getResource("/beans.xml"), "beans.xml")
@@ -70,7 +72,7 @@ public final class Deployments {
                         .addAsManifestResource(ConfigureCache.class.getResource("/META-INF/services/javax.enterprise.inject.spi.Extension"), "services/javax.enterprise.inject.spi.Extension")
             )
             .addAsLibraries(
-                  DependencyResolvers.use(MavenDependencyResolver.class).configureFrom("private_settings_mead_jdg.xml")
+                  DependencyResolvers.use(MavenDependencyResolver.class)
                         .loadMetadataFromPom(pomPath)
                         .artifact("org.jboss.solder:solder-impl")
                         .resolveAs(JavaArchive.class)
