@@ -22,11 +22,10 @@
  */
 package org.infinispan.lucene;
 
-import java.util.Arrays;
-
 import junit.framework.Assert;
-
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 /**
  * Tests basic functionality of LuceneKey2StringMapper
@@ -72,4 +71,36 @@ public class Key2StringMapperTest {
       mapper.getKeyMapping("|*|the leaves of Amazonia");
    }
 
+   @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Not supporting null keys")
+   public void failureForNullKey() {
+      mapper.getKeyMapping(null);
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void failureForNotFullKey() {
+      mapper.getKeyMapping("sgments0.gen|34");
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void failureForWrongFileCacheKey() {
+      mapper.getKeyMapping("filename|M|5|indexname");
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void failureForWrongChunkCacheKey() {
+      mapper.getKeyMapping("filename|5a|5|indexname");
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void failureForWrongFileReadLockKey() {
+      mapper.getKeyMapping("filename|RL|5|indexname");
+   }
+
+   public void testIsSupportedType() {
+      assert !mapper.isSupportedType(this.getClass());
+      assert mapper.isSupportedType(ChunkCacheKey.class);
+      assert mapper.isSupportedType(FileCacheKey.class);
+      assert mapper.isSupportedType(FileListCacheKey.class);
+      assert mapper.isSupportedType(FileReadLockKey.class);
+   }
 }

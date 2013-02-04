@@ -18,12 +18,6 @@
  */
 package org.infinispan.lucene.cachestore;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IndexInput;
 import org.infinispan.container.entries.ImmortalCacheEntry;
@@ -39,6 +33,12 @@ import org.infinispan.lucene.KeyVisitor;
 import org.infinispan.lucene.logging.Log;
 import org.infinispan.util.concurrent.ConcurrentHashSet;
 import org.infinispan.util.logging.LogFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Contains the low-level logic to map the cache structure the the "native"
@@ -84,7 +84,7 @@ final class DirectoryLoaderAdaptor {
       if (toLoadElements <= 0) {
          return;
       }
-      HashSet<IndexScopedKey> keysCollector = new HashSet<IndexScopedKey>(toLoadElements);
+      HashSet<IndexScopedKey> keysCollector = new HashSet<IndexScopedKey>();
       loadSomeKeys(keysCollector, Collections.EMPTY_SET, toLoadElements);
       for (IndexScopedKey key : keysCollector) {
          Object value = load(key);

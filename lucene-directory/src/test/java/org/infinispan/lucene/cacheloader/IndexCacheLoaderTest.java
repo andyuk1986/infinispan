@@ -18,9 +18,6 @@
  */
 package org.infinispan.lucene.cacheloader;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
@@ -45,6 +42,9 @@ import org.infinispan.test.TestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Verify we can write to a FSDirectory, and when using it via the {@link LuceneCacheLoader}
  * we can find the same contents as by searching it directly.
@@ -57,14 +57,14 @@ import org.testng.annotations.Test;
 @Test(groups = "functional", testName = "lucene.cacheloader.IndexCacheLoaderTest")
 public class IndexCacheLoaderTest {
 
-   private static final String rootDirectoryName = "indexesRootDirTmp";
-   private static final int SCALE = 600;
+   protected static final String rootDirectoryName = "indexesRootDirTmp";
+   protected static final int SCALE = 600;
+   protected final String parentDir = "/home/anna.manukyan";
 
    @Test
    public void readExistingIndexTest() throws IOException {
-      File rootDir = new File(new File("."), rootDirectoryName);
-      boolean directoriesCreated = rootDir.mkdirs();
-      assert directoriesCreated : "couldn't create directory for test";
+      File rootDir = createRootDir();
+
       try {
          createIndex(rootDir, "index-A", 10 * SCALE, true);
          createIndex(rootDir, "index-B", 20 * SCALE, false);
@@ -76,7 +76,7 @@ public class IndexCacheLoaderTest {
       }
    }
 
-   private void verifyIndex(File rootDir, String indexName, int termsAdded, boolean inverted) throws IOException {
+   protected void verifyIndex(File rootDir, String indexName, int termsAdded, boolean inverted) throws IOException {
       File indexDir = new File(rootDir, indexName);
       Directory directory = FSDirectory.open(indexDir);
       try {
@@ -100,7 +100,7 @@ public class IndexCacheLoaderTest {
       }
    }
 
-   private EmbeddedCacheManager initializeInfinispan(File rootDir, String indexName) {
+   protected EmbeddedCacheManager initializeInfinispan(File rootDir, String indexName) {
       ConfigurationBuilder builder = new ConfigurationBuilder();
       builder
          .loaders()
@@ -111,7 +111,7 @@ public class IndexCacheLoaderTest {
       return TestCacheManagerFactory.createCacheManager(builder);
    }
 
-   private void verifyOnDirectory(Directory directory, String indexName, int termsAdded, boolean inverted) throws IOException {
+   protected void verifyOnDirectory(Directory directory, String indexName, int termsAdded, boolean inverted) throws IOException {
       IndexReader indexReader = IndexReader.open(directory);
       IndexSearcher searcher = new IndexSearcher(indexReader);
       try {
@@ -138,7 +138,7 @@ public class IndexCacheLoaderTest {
       }
    }
 
-   private void createIndex(File rootDir, String indexName, int termsToAdd, boolean invert) throws IOException {
+   protected void createIndex(File rootDir, String indexName, int termsToAdd, boolean invert) throws IOException {
       File indexDir = new File(rootDir, indexName);
       FSDirectory directory = FSDirectory.open(indexDir);
       try {
@@ -168,4 +168,13 @@ public class IndexCacheLoaderTest {
       }
    }
 
+   protected File createRootDir() {
+      File rootDir = new File(new File(parentDir), rootDirectoryName);
+      boolean directoriesCreated = rootDir.mkdirs();
+      assert directoriesCreated : "couldn't create directory for test";
+
+      rootDir.deleteOnExit();
+
+      return rootDir;
+   }
 }
