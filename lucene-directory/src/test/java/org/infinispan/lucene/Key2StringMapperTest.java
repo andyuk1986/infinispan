@@ -54,16 +54,50 @@ public class Key2StringMapperTest {
    public void loadFileCacheKey() {
       Assert.assertEquals(new FileCacheKey("poems and songs, 3000AC-2000DC", "filename.extension"), mapper.getKeyMapping("filename.extension|M|poems and songs, 3000AC-2000DC"));
    }
+
+   @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "filename must not be null")
+   public void testFileCacheKeyInit() {
+      new FileCacheKey("poems and songs, 3000AC-2000DC", null);
+   }
+
+   @Test
+   public void testFileCacheKeyCompWithNull() {
+      assert !(new FileCacheKey("poems and songs, 3000AC-2000DC", "fileName.txt").equals(null));
+   }
    
    @Test
    public void loadFileListCacheKey() {
       Assert.assertEquals(new FileListCacheKey(""), mapper.getKeyMapping("*|"));
       Assert.assertEquals(new FileListCacheKey("the leaves of Amazonia"), mapper.getKeyMapping("*|the leaves of Amazonia"));
    }
+
+   @Test
+   public void testFileListCacheKeyComparison() {
+      assert !(new FileListCacheKey("index-A").equals(null));
+      assert !(new FileListCacheKey("index-A").equals(new FileCacheKey("index-A", "test.txt")));
+   }
    
    @Test
    public void loadReadLockKey() {
       Assert.assertEquals(new FileReadLockKey("poems and songs, 3000AC-2000DC", "brushed steel lock"), mapper.getKeyMapping("brushed steel lock|RL|poems and songs, 3000AC-2000DC"));
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testReadLockKeyIndexNameNull() {
+      FileReadLockKey key = new FileReadLockKey(null, "brushed steel lock");
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testReadLockKeyFileNameNull() {
+      FileReadLockKey key = new FileReadLockKey("poems and songs, 3000AC-2000DC", null);
+   }
+
+   public void testReadLockEqualsWithNullOrNotEqualObj() {
+      FileReadLockKey key = new FileReadLockKey("poems and songs, 3000AC-2000DC", "brushed steel lock");
+      assert !key.equals(null);
+
+      assert !(new FileReadLockKey("poems and songs, 3000AC-2000DC", "brushed lock")
+            .equals(mapper.getKeyMapping("brushed steel lock|RL|poems and songs, 3000AC-2000DC")));
    }
    
    @Test(expectedExceptions=IllegalArgumentException.class)
@@ -94,6 +128,18 @@ public class Key2StringMapperTest {
    @Test(expectedExceptions = IllegalArgumentException.class)
    public void failureForWrongFileReadLockKey() {
       mapper.getKeyMapping("filename|RL|5|indexname");
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "filename must not be null")
+   public void testChunkCacheKeyInitWithNllFileName() {
+      new ChunkCacheKey("index-A", null, 0, 1024);
+   }
+
+   @Test
+   public void testChunkCacheKeyComparison() {
+      assert !(new ChunkCacheKey("index-A", "fileName", 0, 1024).equals(null));
+      assert !(new ChunkCacheKey("index-A", "fileName", 0, 1024).equals(new ChunkCacheKey("index-A", "fileName1", 0, 1024)));
+      assert (new ChunkCacheKey("index-A", "fileName", 0, 1024).equals(new ChunkCacheKey("index-A", "fileName", 0, 1024)));
    }
 
    public void testIsSupportedType() {

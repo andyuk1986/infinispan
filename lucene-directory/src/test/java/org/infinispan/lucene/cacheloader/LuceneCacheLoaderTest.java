@@ -23,10 +23,13 @@ import org.infinispan.CacheException;
 import org.infinispan.container.entries.InternalCacheEntry;
 import org.infinispan.loaders.CacheLoaderException;
 import org.infinispan.loaders.CacheLoaderManager;
+import org.infinispan.lucene.ChunkCacheKey;
 import org.infinispan.lucene.FileCacheKey;
 import org.infinispan.lucene.FileListCacheKey;
+import org.infinispan.lucene.FileReadLockKey;
 import org.infinispan.lucene.InfinispanDirectory;
 import org.infinispan.lucene.cachestore.LuceneCacheLoader;
+import org.infinispan.lucene.cachestore.LuceneCacheLoaderConfig;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.test.TestingUtil;
 import org.testng.AssertJUnit;
@@ -120,6 +123,35 @@ public class LuceneCacheLoaderTest extends IndexCacheLoaderTest {
       }
    }
 
+   public void testContainsKeyCacheKeyTypes() throws Exception {
+      EmbeddedCacheManager cacheManager = null;
+      File rootDir = createRootDir();
+      try {
+         createIndex(rootDir, indexName, elementCount, true);
+
+         cacheManager = initializeInfinispan(rootDir, indexName);
+
+         LuceneCacheLoader cacheLoader = (LuceneCacheLoader) TestingUtil.extractComponent(cacheManager.getCache(),
+                                                                                          CacheLoaderManager.class).getCacheLoader();
+
+         assert cacheLoader.containsKey(new FileListCacheKey(indexName));
+
+         String[] fileNamesFromIndexDir = getFileNamesFromDir(rootDir);
+         for(String fileName : fileNamesFromIndexDir) {
+            assert !cacheLoader.containsKey(new FileReadLockKey(indexName, fileName)) : "Failed for " + fileName;
+            assert cacheLoader.containsKey(new ChunkCacheKey(indexName, fileName, 0, 1024)) : "Failed for " + fileName;
+         }
+
+         assert !cacheLoader.containsKey(new ChunkCacheKey(indexName, "testFile.txt", 0, 1024));
+      } finally {
+         TestingUtil.recursiveFileRemove(rootDir);
+
+         if(cacheManager != null) {
+            TestingUtil.killCacheManagers(cacheManager);
+         }
+      }
+   }
+
    public void testLoadKey() throws Exception {
       File rootDir = createRootDir();
       EmbeddedCacheManager cacheManager = null;
@@ -157,6 +189,35 @@ public class LuceneCacheLoaderTest extends IndexCacheLoaderTest {
                                                                                           CacheLoaderManager.class).getCacheLoader();
          FileCacheKey key = new FileCacheKey(indexName, "testKey");
          assert cacheLoader.load(key) == null;
+      } finally {
+         TestingUtil.recursiveFileRemove(rootDir);
+
+         if(cacheManager != null) {
+            TestingUtil.killCacheManagers(cacheManager);
+         }
+      }
+   }
+
+   @Test(expectedExceptions = CacheLoaderException.class)
+   public void testLoadKeyWithInnerNonReadableDir() throws Exception {
+      File rootDir = createRootDir();
+
+      EmbeddedCacheManager cacheManager = null;
+      try {
+         createIndex(rootDir, indexName, elementCount, true);
+
+         cacheManager = initializeInfinispan(rootDir, indexName);
+         LuceneCacheLoader cacheLoader = (LuceneCacheLoader) TestingUtil.extractComponent(cacheManager.getCache(),
+                                                                                          CacheLoaderManager.class).getCacheLoader();
+
+         File innerDir = new File(rootDir, "index-B");
+         boolean created = innerDir.mkdirs();
+         assert created;
+
+         innerDir.setReadable(false);
+         innerDir.setWritable(false);
+
+         cacheLoader.load(5);
       } finally {
          TestingUtil.recursiveFileRemove(rootDir);
 
@@ -309,6 +370,65 @@ public class LuceneCacheLoaderTest extends IndexCacheLoaderTest {
       }
    }
 
+   public void testLoadAllKeysWithExclusionOfRootKey() throws Exception {
+      File rootDir = createRootDir();
+      EmbeddedCacheManager cacheManager = null;
+      try {
+         createIndex(rootDir, indexName, elementCount, true);
+
+         cacheManager = initializeInfinispan(rootDir, indexName);
+
+         LuceneCacheLoader cacheLoader = (LuceneCacheLoader) TestingUtil.extractComponent(cacheManager.getCache(),
+                                                                                          CacheLoaderManager.class).getCacheLoader();
+
+         HashSet exclusionSet = new HashSet();
+         exclusionSet.add(new FileListCacheKey(indexName));
+
+         Set keyList = cacheLoader.loadAllKeys(exclusionSet);
+
+         AssertJUnit.assertEquals(10, keyList.size());
+
+         Iterator it = keyList.iterator();
+         while (it.hasNext()) {
+            assert !(it.next() instanceof FileListCacheKey);
+         }
+      } finally {
+         TestingUtil.recursiveFileRemove(rootDir);
+
+         if(cacheManager != null) {
+            TestingUtil.killCacheManagers(cacheManager);
+         }
+      }
+   }
+
+   public void testLoadAllKeysWithChunkExclusion() throws Exception {
+      File rootDir = createRootDir();
+      EmbeddedCacheManager cacheManager = null;
+      try {
+         createIndex(rootDir, indexName, elementCount, true);
+         cacheManager = initializeInfinispan(rootDir, indexName);
+
+         LuceneCacheLoader cacheLoader = (LuceneCacheLoader) TestingUtil.extractComponent(cacheManager.getCache(),
+                                                                                          CacheLoaderManager.class).getCacheLoader();
+
+         HashSet exclusionSet = new HashSet();
+         String[] fileNames = getFileNamesFromDir(rootDir);
+         for(String fileName : fileNames) {
+            exclusionSet.add(new ChunkCacheKey(indexName, fileName, 0, 1024));
+         }
+
+         Set keyList = cacheLoader.loadAllKeys(exclusionSet);
+
+         AssertJUnit.assertEquals(11, keyList.size());
+      } finally {
+         TestingUtil.recursiveFileRemove(rootDir);
+
+         if(cacheManager != null) {
+            TestingUtil.killCacheManagers(cacheManager);
+         }
+      }
+   }
+
    @Test(enabled = false)
    public void testLoadAllKeysWithNullExclusion() throws Exception {
       File rootDir = createRootDir();
@@ -347,6 +467,23 @@ public class LuceneCacheLoaderTest extends IndexCacheLoaderTest {
       }
    }
 
+   public void testGetConfigurationClass() {
+      File rootDir = createRootDir();
+      EmbeddedCacheManager cacheManager = null;
+      try {
+         cacheManager = initializeInfinispan(rootDir, indexName);
+         LuceneCacheLoader cacheLoader = (LuceneCacheLoader) TestingUtil.extractComponent(cacheManager.getCache(),
+                                                                                          CacheLoaderManager.class).getCacheLoader();
+
+         assert cacheLoader.getConfigurationClass() == LuceneCacheLoaderConfig.class;
+      } finally {
+         TestingUtil.recursiveFileRemove(rootDir);
+
+         if(cacheManager != null) {
+            TestingUtil.killCacheManagers(cacheManager);
+         }
+      }
+   }
 
    @DataProvider(name = "passEntriesCount")
    public Object[][] provideEntriesCount() {
