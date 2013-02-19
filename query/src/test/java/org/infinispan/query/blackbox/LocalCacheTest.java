@@ -22,11 +22,6 @@
  */
 package org.infinispan.query.blackbox;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import junit.framework.Assert;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
@@ -60,7 +55,12 @@ import org.infinispan.test.SingleCacheManagerTest;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.infinispan.query.helper.TestQueryHelperFactory.createCacheQuery;
@@ -88,7 +88,7 @@ public class LocalCacheTest extends SingleCacheManagerTest {
    public void testSimple() throws ParseException {
       loadTestingData();
       CacheQuery cacheQuery = createCacheQuery(cache, "blurb", "playing" );
-
+      System.out.println("first fix");
       List<Object> found = cacheQuery.list();
 
       int elems = found.size();
