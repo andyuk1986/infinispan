@@ -90,6 +90,7 @@ public class LocalCacheTest extends SingleCacheManagerTest {
       CacheQuery cacheQuery = createCacheQuery(cache, "blurb", "playing" );
       System.out.println("first fix");
       List<Object> found = cacheQuery.list();
+      System.out.println("second fix");
 
       int elems = found.size();
       assert elems == 1 : "Expected 1 but was " + elems;
