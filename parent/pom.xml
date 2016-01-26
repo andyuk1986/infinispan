@@ -187,7 +187,7 @@
       <version.maven.surefire>2.18.1</version.maven.surefire>
       <version.maven.invoker>1.8</version.maven.invoker>
       <version.metainf-services>1.5</version.metainf-services>
-      <version.jacoco>0.5.10.201208310627</version.jacoco>
+      <version.jacoco>0.7.5.201505241946</version.jacoco>
       <version.asm>3.3.1</version.asm>
       <version.pax.url>2.2.0</version.pax.url>
       <version.karaf>3.0.4</version.karaf>
@@ -1164,6 +1164,13 @@
          <artifactId>junit</artifactId>
          <scope>test</scope>
       </dependency>
+      <dependency>
+         <groupId>org.jacoco</groupId>
+         <artifactId>org.jacoco.agent</artifactId>
+         <classifier>runtime</classifier>
+         <version>${version.jacoco}</version>
+         <scope>test</scope>
+      </dependency>
    </dependencies>
    <repositories>
       <repository>
@@ -1338,7 +1345,7 @@
                <artifactId>jetty-maven-plugin</artifactId>
                <version>8.0.0.M3</version>
             </plugin>
-            <plugin>
+            <!--<plugin>
                <groupId>org.jacoco</groupId>
                <artifactId>jacoco-maven-plugin</artifactId>
                <version>${version.jacoco}</version>
@@ -1347,7 +1354,7 @@
                      <include>org.infinispan.*</include>
                   </includes>
                </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -1953,7 +1960,7 @@
 
          <build>
             <plugins>
-               <plugin>
+               <!--<plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-dependency-plugin</artifactId>
                   <executions>
@@ -1993,10 +2000,10 @@
                         </configuration>
                      </execution>
                   </executions>
-               </plugin>
+               </plugin>-->
 
 
-               <plugin>
+               <!--<plugin>
                   <groupId>org.jacoco</groupId>
                   <artifactId>jacoco-maven-plugin</artifactId>
                   <executions>
@@ -2009,36 +2016,68 @@
                   <configuration>
                      <propertyName>jacocoAgent</propertyName>
                   </configuration>
-               </plugin>
+               </plugin>-->
 
 
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-surefire-plugin</artifactId>
                   <configuration>
-                     <argLine combine.self="override">-Xmx2G ${jacocoAgent}</argLine>
-                     <parallel combine.self="override">tests</parallel>
-                     <threadCount combine.self="override">${infinispan.test.parallel.threads}</threadCount>
-                     <groups combine.self="override">${defaultTestGroup}</groups>
-                     <systemPropertyVariables combine.self="override">
-                           <infinispan.test.jgroups.protocol>${infinispan.test.jgroups.protocol}</infinispan.test.jgroups.protocol>
-                           <jgroups.bind_addr>127.0.0.1</jgroups.bind_addr>
-                           <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
-                     </systemPropertyVariables>
-                     <trimStackTrace combine.self="override">false</trimStackTrace>
-                     <properties combine.self="override">
-                        <property>
-                           <name>listener</name>
-                           <value>${testNGListener}</value>
-                        </property>
-                     </properties>
+                     <argLine combine.self="override">${forkJvmArgs} -Dsun.nio.ch.bugLevel ${jacoco.agent.argLine}</argLine>
+                  </configuration>
+               </plugin>
+
+               <plugin>
+                  <groupId>org.jacoco</groupId>
+                  <artifactId>jacoco-maven-plugin</artifactId>
+                  <version>${version.jacoco}</version>
+                  <executions>
+                     <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                           <goal>prepare-agent</goal>
+                        </goals>
+                     </execution>
+                     <execution>
+                        <id>default-report</id>
+                        <goals>
+                           <goal>report</goal>
+                        </goals>
+                     </execution>
+                     <execution>
+                        <id>default-check</id>
+                        <goals>
+                           <goal>check</goal>
+                        </goals>
+                        <configuration>
+                           <rules>
+                              <!--  implementation is needed only for Maven 2  -->
+                              <rule implementation="org.jacoco.maven.RuleConfiguration">
+                                 <element>BUNDLE</element>
+                                 <limits>
+                                    <!--  implementation is needed only for Maven 2  -->
+                                    <limit implementation="org.jacoco.report.check.Limit">
+                                       <counter>COMPLEXITY</counter>
+                                       <value>COVEREDRATIO</value>
+                                       <minimum>0.50</minimum>
+                                    </limit>
+                                 </limits>
+                              </rule>
+                           </rules>
+                        </configuration>
+                     </execution>
+                  </executions>
+                  <configuration>
+                     <propertyName>jacoco.agent.argLine</propertyName>
+                     <destfile>${project.build.directory}/target/jacoco.exec</destfile>
+                     <datafile>${project.build.directory}/target/jacoco.exec</datafile>
                   </configuration>
                </plugin>
             </plugins>
          </build>
       </profile>
 
-      <profile>
+      <!--<profile>
          <id>jacocoReport</id>
 
          <build>
@@ -2108,7 +2147,7 @@
                </plugin>
             </plugins>
          </build>
-      </profile>
+      </profile>-->
 
    </profiles>
 </project>
