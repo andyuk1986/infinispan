@@ -1960,65 +1960,6 @@
 
          <build>
             <plugins>
-               <!--<plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-dependency-plugin</artifactId>
-                  <executions>
-
-                     <execution>
-                        <id>jacoco-dependency-ant</id>
-                        <goals>
-                           <goal>copy</goal>
-                        </goals>
-                        <phase>process-test-resources</phase>
-                        <inherited>false</inherited>
-                        <configuration>
-                           <artifactItems>
-                              <artifactItem>
-                                 <groupId>org.jacoco</groupId>
-                                 <artifactId>org.jacoco.ant</artifactId>
-                                 <version>${version.jacoco}</version>
-                              </artifactItem>
-                              <artifactItem>
-                                 <groupId>org.jacoco</groupId>
-                                 <artifactId>org.jacoco.core</artifactId>
-                                 <version>${version.jacoco}</version>
-                              </artifactItem>
-                              <artifactItem>
-                                 <groupId>org.jacoco</groupId>
-                                 <artifactId>org.jacoco.report</artifactId>
-                                 <version>${version.jacoco}</version>
-                              </artifactItem>
-                              <artifactItem>
-                                 <groupId>asm</groupId>
-                                 <artifactId>asm-all</artifactId>
-                                 <version>${version.asm}</version>
-                              </artifactItem>
-                           </artifactItems>
-                           <stripVersion>true</stripVersion>
-                           <outputDirectory>${basedir}/target/jacoco-jars</outputDirectory>
-                        </configuration>
-                     </execution>
-                  </executions>
-               </plugin>-->
-
-
-               <!--<plugin>
-                  <groupId>org.jacoco</groupId>
-                  <artifactId>jacoco-maven-plugin</artifactId>
-                  <executions>
-                     <execution>
-                        <goals>
-                           <goal>prepare-agent</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-                  <configuration>
-                     <propertyName>jacocoAgent</propertyName>
-                  </configuration>
-               </plugin>-->
-
-
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-surefire-plugin</artifactId>
@@ -2043,111 +1984,37 @@
                         <goals>
                            <goal>report</goal>
                         </goals>
+                        <phase>install</phase>
                      </execution>
                      <execution>
-                        <id>default-check</id>
+                        <id>default-merge</id>
                         <goals>
-                           <goal>check</goal>
+                           <goal>merge</goal>
                         </goals>
+                        <phase>verify</phase>
                         <configuration>
-                           <rules>
-                              <!--  implementation is needed only for Maven 2  -->
-                              <rule implementation="org.jacoco.maven.RuleConfiguration">
-                                 <element>BUNDLE</element>
-                                 <limits>
-                                    <!--  implementation is needed only for Maven 2  -->
-                                    <limit implementation="org.jacoco.report.check.Limit">
-                                       <counter>COMPLEXITY</counter>
-                                       <value>COVEREDRATIO</value>
-                                       <minimum>0.50</minimum>
-                                    </limit>
-                                 </limits>
-                              </rule>
-                           </rules>
+                           <fileSets>
+                              <fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
+                                 <directory>${dir.ispn}/jacoco</directory>
+                                 <includes>
+                                    <include>*.exec</include>
+                                 </includes>
+                              </fileSet>
+                           </fileSets>
+                           <destFile>${dir.ispn}/jacoco/jacoco.exec</destFile>
                         </configuration>
                      </execution>
                   </executions>
                   <configuration>
                      <propertyName>jacoco.agent.argLine</propertyName>
-                     <destfile>${project.build.directory}/target/jacoco.exec</destfile>
-                     <datafile>${project.build.directory}/target/jacoco.exec</datafile>
+                     <append>true</append>
+                     <destFile>${dir.ispn}/jacoco/${project.artifactId}.exec</destFile>
+                     <dataFile>${dir.ispn}/jacoco/jacoco.exec</dataFile>
+                     <outputDirectory>${dir.ispn}/jacoco/report</outputDirectory>
                   </configuration>
                </plugin>
             </plugins>
          </build>
       </profile>
-
-      <!--<profile>
-         <id>jacocoReport</id>
-
-         <build>
-            <plugins>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-antrun-plugin</artifactId>
-                  <executions>
-                     <execution>
-                        <phase>install</phase>
-                        <goals>
-                           <goal>run</goal>
-                        </goals>
-                        <configuration combine.self="override">
-                           <target>
-
-                              <taskdef classname="org.jacoco.ant.ReportTask" name="report">
-                                 <classpath path="${basedir}/target/jacoco-jars/org.jacoco.ant.jar" />
-                                 <classpath path="target/jacoco-jars/org.jacoco.core.jar" />
-                                 <classpath path="target/jacoco-jars/org.jacoco.report.jar" />
-                                 <classpath path="target/jacoco-jars/asm-all.jar" />
-                              </taskdef>
-
-                              <echo message="Deleting previous report" />
-                              <delete dir="${dir.report}" />
-
-                              <echo message="Creating report directory" />
-                              <mkdir dir="${dir.report}" />
-
-                              <echo message="Generating JaCoCo Reports" />
-                              <report>
-
-                                 <executiondata>
-                                    <fileset dir="${dir.ispn}" includes="**/target/jacoco.exec" />
-                                 </executiondata>
-
-
-                                 <structure name="${reportTitle}">
-                                    <classfiles>
-                                       <fileset dir="${dir.ispn}">
-                                          <include name="**/target/classes/" />
-                                       </fileset>
-                                    </classfiles>
-                                    <sourcefiles encoding="UTF-8">
-                                       <mappedresources>
-                                          <fileset dir="${dir.ispn}" includes="**/src/main/java/**/*.java" />
-                                          <mapper from="^(.*/java/)(.*)$" to="\2" type="regexp" />
-                                       </mappedresources>
-                                    </sourcefiles>
-
-                                 </structure>
-
-
-                                 <html destdir="${dir.report}" />
-                              </report>
-                           </target>
-                        </configuration>
-                     </execution>
-                  </executions>
-                  <dependencies>
-                     <dependency>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>org.jacoco.ant</artifactId>
-                        <version>${version.jacoco}</version>
-                     </dependency>
-                  </dependencies>
-               </plugin>
-            </plugins>
-         </build>
-      </profile>-->
-
    </profiles>
 </project>
