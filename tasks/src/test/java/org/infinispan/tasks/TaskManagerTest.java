@@ -2,16 +2,31 @@ package org.infinispan.tasks;
 
 import static org.testng.AssertJUnit.assertEquals;
 
+import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.infinispan.Cache;
+import org.infinispan.configuration.cache.AuthorizationConfigurationBuilder;
+import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.global.GlobalAuthorizationConfigurationBuilder;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.security.AuthorizationPermission;
+import org.infinispan.security.CachePermission;
+import org.infinispan.security.PrincipalRoleMapper;
+import org.infinispan.security.Security;
+import org.infinispan.security.impl.ClusterRoleMapper;
+import org.infinispan.security.impl.IdentityRoleMapper;
 import org.infinispan.tasks.DummyTaskEngine.DummyTaskTypes;
 import org.infinispan.tasks.impl.TaskManagerImpl;
 import org.infinispan.test.SingleCacheManagerTest;
+import org.infinispan.test.TestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.annotations.Test;
+
+import javax.security.auth.Subject;
 
 @Test(testName = "tasks.TaskManagerTest", groups = "functional")
 public class TaskManagerTest extends SingleCacheManagerTest {
@@ -27,9 +42,20 @@ public class TaskManagerTest extends SingleCacheManagerTest {
    @Override
    protected void setup() throws Exception {
       super.setup();
+
       taskManager = (TaskManagerImpl) cacheManager.getGlobalComponentRegistry().getComponent(TaskManager.class);
       taskEngine = new DummyTaskEngine();
       taskManager.registerTaskEngine(taskEngine);
+   }
+
+   @Test(expectedExceptions = IllegalStateException.class)
+   public void testRegisterDuplicateEngine() {
+      taskManager.registerTaskEngine(taskEngine);
+   }
+
+   @Test(expectedExceptions = IllegalArgumentException.class)
+   public void testUnhandledTask() {
+      taskManager.runTask("UnhandledTask", new TaskContext());
    }
 
    public void testRunTask() throws InterruptedException, ExecutionException {
