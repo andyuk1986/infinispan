@@ -4,6 +4,7 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -21,6 +22,7 @@ import org.infinispan.security.impl.ClusterRoleMapper;
 import org.infinispan.security.impl.IdentityRoleMapper;
 import org.infinispan.tasks.DummyTaskEngine.DummyTaskTypes;
 import org.infinispan.tasks.impl.TaskManagerImpl;
+import org.infinispan.tasks.spi.TaskEngine;
 import org.infinispan.test.SingleCacheManagerTest;
 import org.infinispan.test.TestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
@@ -58,6 +60,13 @@ public class TaskManagerTest extends SingleCacheManagerTest {
       taskManager.runTask("UnhandledTask", new TaskContext());
    }
 
+   public void testStoredEngines() {
+      Collection<TaskEngine> engines = taskManager.getEngines();
+      assertEquals(1, engines.size());
+
+      assertEquals(taskEngine.getName(), engines.iterator().next().getName());
+   }
+
    public void testRunTask() throws InterruptedException, ExecutionException {
       CompletableFuture<String> okTask = taskManager.runTask(DummyTaskTypes.SUCCESSFUL_TASK.name(), new TaskContext());
       assertEquals("result", okTask.get());
@@ -71,7 +80,7 @@ public class TaskManagerTest extends SingleCacheManagerTest {
       assertEquals(1, currentTasks.size());
       TaskExecution execution = currentTasks.iterator().next();
       assertEquals(DummyTaskTypes.SLOW_TASK.name(), execution.getName());
-      taskEngine.slow.complete("slow");
+      taskEngine.getSlowTask().complete("slow");
       assertEquals(0, taskManager.getCurrentTasks().size());
       assertEquals("slow", slowTask.get());
    }

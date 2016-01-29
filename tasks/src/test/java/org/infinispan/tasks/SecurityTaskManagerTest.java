@@ -7,33 +7,39 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.security.AuthorizationPermission;
 import org.infinispan.security.Security;
 import org.infinispan.security.impl.IdentityRoleMapper;
+import org.infinispan.tasks.impl.TaskExecutionImpl;
 import org.infinispan.tasks.impl.TaskManagerImpl;
 import org.infinispan.test.SingleCacheManagerTest;
 import org.infinispan.test.TestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.security.auth.Subject;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
- * // TODO: Document this
+ * Tests verifying the tasks execution with cache security settings.
  *
  * @author amanukya
- * @since 4.0
  */
 @Test(groups = "functional", testName = "tasks.SecurityTaskManagerTest")
 public class SecurityTaskManagerTest extends SingleCacheManagerTest {
 
     static final Subject ADMIN = TestingUtil.makeSubject("admin", "admin");
     static final Subject HACKER = TestingUtil.makeSubject("hacker", "hacker");
+
     protected TaskManagerImpl taskManager;
     private DummyTaskEngine taskEngine;
 
@@ -56,7 +62,7 @@ public class SecurityTaskManagerTest extends SingleCacheManagerTest {
         Security.doAs(ADMIN, new PrivilegedExceptionAction<Void>() {
             @Override
             public Void run() throws Exception {
-                SecurityTaskManagerTest.super.setup();;
+                SecurityTaskManagerTest.super.setup();
 
                 taskManager = (TaskManagerImpl) cacheManager.getGlobalComponentRegistry().getComponent(TaskManager.class);
                 taskEngine = new DummyTaskEngine();
@@ -88,24 +94,41 @@ public class SecurityTaskManagerTest extends SingleCacheManagerTest {
         });
     }
 
-    public void testTaskExecutionWithAuthorization() throws Exception {
-        Security.doAs(HACKER, new PrivilegedAction<Void>() {
+    @Test(dataProvider = "principleProvider")
+    public void testTaskExecutionWithAuthorization(String principal, Subject subject) throws Exception {
+        System.out.println("Run with " + principal);
+        Security.doAs(subject, new PrivilegedAction<Void>() {
             @Override
             public Void run() {
-                CompletableFuture<String> okTask = taskManager.runTask(DummyTaskEngine.DummyTaskTypes.SUCCESSFUL_TASK.name(), new TaskContext());
+                CompletableFuture<Object> slowTask = taskManager.runTask(DummyTaskEngine.DummyTaskTypes.SLOW_TASK.name(), new TaskContext());
+                Collection<TaskExecution> currentTasks = taskManager.getCurrentTasks();
+                assertEquals(1, currentTasks.size());
+
+                TaskExecution currentTask = currentTasks.iterator().next();
+                assertEquals(DummyTaskEngine.DummyTaskTypes.SLOW_TASK.name(), currentTask.getName());
+                assertEquals(principal, currentTask.getWho().get());
+                taskEngine.getSlowTask().complete("slow");
+
+                assertEquals(0, taskManager.getCurrentTasks().size());
                 try {
-                    assertEquals("result", okTask.get());
+                    assertEquals("slow", slowTask.get());
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
+
+                taskEngine.setSlowTask(new CompletableFuture<>());
                 return null;
             }
         });
-
     }
 
-    public void testTaskExecutionWithoutUser() throws Exception { //<-- Throwing nullpointer if no principle is provided.
+    /*public void testTaskExecutionWithoutUser() throws Exception { //<-- Throwing nullpointer if no principle is provided.
         CompletableFuture<String> okTask = taskManager.runTask(DummyTaskEngine.DummyTaskTypes.SUCCESSFUL_TASK.name(), new TaskContext());
         assertEquals("result", okTask.get());
+    }*/
+
+    @DataProvider(name = "principleProvider")
+    private static Object[][] providePrinciples() {
+        return new Object[][] {{"admin", ADMIN}, {"hacker", HACKER}};
     }
 }

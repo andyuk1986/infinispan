@@ -1960,7 +1960,7 @@
                   </configuration>
                </plugin>
 
-               <!--<plugin>
+               <plugin>
                   <groupId>org.jacoco</groupId>
                   <artifactId>jacoco-maven-plugin</artifactId>
                   <version>${version.jacoco}</version>
@@ -1996,31 +1996,6 @@
                         </configuration>
                      </execution>
                   </executions>
-               </plugin>-->
-               <plugin>
-                  <groupId>org.jacoco</groupId>
-                  <artifactId>jacoco-maven-plugin</artifactId>
-                  <version>${version.jacoco}</version>
-                  <executions>
-                     <execution>
-                        <id>default-prepare-agent</id>
-                        <goals>
-                           <goal>prepare-agent</goal>
-                        </goals>
-                     </execution>
-                     <execution>
-                        <id>default-report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                           <goal>report</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-                  <configuration>
-                     <propertyName>jacoco.agent.argLine</propertyName>
-                     <destFile>${project.build.directory}/target/jacoco.exec</destFile>
-                     <dataFile>${project.build.directory}/target/jacoco.exec</dataFile>
-                  </configuration>
                </plugin>
             </plugins>
          </build>
@@ -2049,9 +2024,31 @@
                               <echo>Deleting existing Jacoco Report Directory.</echo>
                               <delete dir="${dir.jacoco.report}"/>
                               <delete dir="${dir.jacoco.merged}"/>
+                              <delete dir="${project.build.directory}/classes" />
                               <echo>Copying the generated classes file to ${project.build.directory}/classes</echo>
                               <copydir src="${dir.jacoco}/classes" dest="${project.build.directory}/classes"/>
                            </target>
+                        </configuration>
+                     </execution>
+                  </executions>
+               </plugin>
+
+               <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>build-helper-maven-plugin</artifactId>
+                  <version>1.7</version>
+                  <executions>
+                     <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                           <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                           <sources>
+                              <source>${dir.ispn}/tasks/src/main/java</source>
+                              <source>${dir.ispn}/scripting/src/main/java</source>
+                           </sources>
                         </configuration>
                      </execution>
                   </executions>
