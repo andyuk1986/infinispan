@@ -1,50 +1,29 @@
 package org.infinispan.scripting;
 
+import org.infinispan.commons.CacheException;
+import org.infinispan.tasks.TaskContext;
+import org.infinispan.test.TestingUtil;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.AssertJUnit.assertEquals;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.ZoneId;
-import java.time.temporal.TemporalUnit;
-import java.util.concurrent.ExecutionException;
-
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.infinispan.commons.CacheException;
-import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.tasks.TaskContext;
-import org.infinispan.test.SingleCacheManagerTest;
-import org.infinispan.test.TestingUtil;
-import org.infinispan.test.fwk.TestCacheManagerFactory;
-import org.testng.annotations.Test;
-
 @Test(groups = "functional", testName = "scripting.ScriptingTest")
-public class ScriptingTest extends SingleCacheManagerTest {
-
-   protected ScriptingManager scriptingManager;
-
-   @Override
-   protected EmbeddedCacheManager createCacheManager() throws Exception {
-      return TestCacheManagerFactory.createCacheManager();
-   }
+public class ScriptingTest extends AbstractScriptingTest {
 
    protected String[] getScripts() {
-      return new String[] { "test.js", "testMissingMetaProps.js", "testExecWithoutProp.js" };
+      return new String[] { "test.js", "testMissingMetaProps.js", "testExecWithoutProp.js", "testInnerScriptCall.js" };
    }
 
    @Override
    protected void setup() throws Exception {
       super.setup();
-      scriptingManager = cacheManager.getGlobalComponentRegistry().getComponent(ScriptingManager.class);
-      for (String scriptName : getScripts()) {
-         try (InputStream is = this.getClass().getResourceAsStream("/" + scriptName)) {
-            String script = TestingUtil.loadFileAsString(is);
-            scriptingManager.addScript(scriptName, script);
-         }
-      }
    }
 
    @Override
@@ -69,15 +48,28 @@ public class ScriptingTest extends SingleCacheManagerTest {
       assertEquals("a", result);
    }
 
-   public void testSimpleScrip1() throws Exception {
-      ScriptObjectMirror result = (ScriptObjectMirror) scriptingManager.runScript("testExecWithoutProp.js").get();
+   public void testSimpleScript1() throws Exception {
+      String value = "javaValue";
+      String key = "processValue";
 
-      long resultTimeInMillis = (Long) result.callMember("getTime");
+      cacheManager.getCache("test_cache").put(key, value);
 
-      LocalDateTime currentDate = LocalDateTime.now();
-      LocalDateTime expectedResult = currentDate.minus(Period.ofDays(5));
+      CompletableFuture exec = scriptingManager.runScript("testExecWithoutProp.js");
+      while (!exec.isDone()) {
+         Thread.sleep(1000);
+      }
 
-      //assertEquals(expectedResult.toEpochSecond(Zone))
+      assertEquals(value + ":additionFromJavascript", cacheManager.getCache("test_cache").get(key));
+   }
+
+   public void testScriptCallFromJavascript() throws Exception {
+      assertNull(cacheManager.getCache().get("a"));
+
+      String result = (String) scriptingManager.runScript("testInnerScriptCall.js",
+              new TaskContext().cache(cacheManager.getCache("test_cache")).addParameter("a", "ahoj")).get();
+
+      assertEquals("script1:additionFromJavascript", result);
+      assertEquals("ahoj", cacheManager.getCache().get("a"));
    }
 
    public void testSimpleScriptWithMissingLanguageInMetaPropeties() throws Exception {

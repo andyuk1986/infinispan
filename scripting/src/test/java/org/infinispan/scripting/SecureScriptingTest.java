@@ -1,13 +1,5 @@
 package org.infinispan.scripting;
 
-import static org.testng.AssertJUnit.assertEquals;
-
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-
-import javax.security.auth.Subject;
-
 import org.infinispan.commons.CacheException;
 import org.infinispan.configuration.cache.AuthorizationConfigurationBuilder;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -23,8 +15,15 @@ import org.infinispan.test.TestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.testng.annotations.Test;
 
+import javax.security.auth.Subject;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
+import static org.testng.AssertJUnit.assertEquals;
+
 @Test(groups = "functional", testName = "scripting.SecureScriptingTest")
-public class SecureScriptingTest extends ScriptingTest {
+public class SecureScriptingTest extends AbstractScriptingTest {
 
    static final Subject ADMIN = TestingUtil.makeSubject("admin", ScriptingManagerImpl.SCRIPT_MANAGER_ROLE);
    static final Subject RUNNER = TestingUtil.makeSubject("runner", "runner");
@@ -92,7 +91,6 @@ public class SecureScriptingTest extends ScriptingTest {
       });
    }
 
-   @Override
    @Test(expectedExceptions= { SecurityException.class, CacheException.class} )
    public void testSimpleScript() throws Exception {
       String result = (String) scriptingManager.runScript("test.js", new TaskContext().addParameter("a", "a").cache(cache())).get();
