@@ -1,27 +1,23 @@
 package org.infinispan.scripting;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import org.infinispan.Cache;
+import org.infinispan.configuration.cache.CacheMode;
+import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.tasks.TaskContext;
+import org.infinispan.test.MultipleCacheManagersTest;
+import org.infinispan.test.data.Address;
+import org.testng.annotations.Test;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.Buffer;
-import java.nio.CharBuffer;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.infinispan.Cache;
-import org.infinispan.configuration.cache.CacheMode;
-import org.infinispan.configuration.cache.ConfigurationBuilder;
-import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.tasks.TaskContext;
-import org.infinispan.test.MultipleCacheManagersTest;
-import org.infinispan.test.TestingUtil;
-import org.testng.annotations.Test;
+import static org.infinispan.scripting.utils.ScriptingUtils.*;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 @Test(groups = "functional", testName = "scripting.ClusteredScriptingTest")
 public class ClusteredScriptingTest extends MultipleCacheManagersTest {
@@ -53,6 +49,23 @@ public class ClusteredScriptingTest extends MultipleCacheManagersTest {
       executeScriptOnManager(1, "test.js");
    }
 
+   @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "^ISPN026009.*")
+   public void testDistributedScriptExecutionWithoutCacheBinding() throws IOException, ExecutionException, InterruptedException {
+      ScriptingManager scriptingManager = getScriptingManager(manager(0));
+      loadScript(scriptingManager, "/distExec.js");
+
+      scriptingManager.runScript("distExec.js").get();
+   }
+
+   public void testDistributedScriptExecution() throws IOException, ExecutionException, InterruptedException {
+      ScriptingManager scriptingManager = getScriptingManager(manager(0));
+      loadScript(scriptingManager, "/distExec.js");
+
+      List<Address> addressList = (List<Address>) scriptingManager.runScript("distExec.js", new TaskContext().cache(cache(0))).get();
+      assertTrue(addressList.contains(manager(0).getAddress()));
+      assertTrue(addressList.contains(manager(1).getAddress()));
+   }
+
    public void testDistExecScript() throws InterruptedException, ExecutionException, IOException {
       ScriptingManager scriptingManager = getScriptingManager(manager(0));
       Cache<String, String> cache = cache(0);
@@ -62,10 +75,6 @@ public class ClusteredScriptingTest extends MultipleCacheManagersTest {
       Map<String, Long> results = resultsFuture.get();
       assertEquals(3209, results.size());
       assertEquals(results.get("macbeth"), Long.valueOf(287));
-   }
-
-   private ScriptingManager getScriptingManager(EmbeddedCacheManager manager) {
-      return manager.getGlobalComponentRegistry().getComponent(ScriptingManager.class);
    }
 
    public void testMapReduce() throws Exception {
@@ -81,26 +90,6 @@ public class ClusteredScriptingTest extends MultipleCacheManagersTest {
       assertTrue(results.get("macbeth").equals(Double.valueOf(287)));
    }
 
-   private void loadData(Cache<String, String> cache, String fileName) throws IOException {
-      try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(fileName)))) {
-         int chunkSize = 10;
-         int chunkId = 0;
 
-         CharBuffer cbuf = CharBuffer.allocate(1024 * chunkSize);
-         while (bufferedReader.read(cbuf) >= 0) {
-            Buffer buffer = cbuf.flip();
-            String textChunk = buffer.toString();
-            cache.put(fileName + (chunkId++), textChunk);
-            cbuf.clear();
-         }
-      }
-   }
-
-   private void loadScript(ScriptingManager scriptingManager, String fileName) throws IOException {
-      try (InputStream is = this.getClass().getResourceAsStream(fileName)) {
-         String script = TestingUtil.loadFileAsString(is);
-         scriptingManager.addScript(fileName.replaceAll("\\/", ""), script);
-      }
-   }
 
 }
