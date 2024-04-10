@@ -243,9 +243,11 @@ public class SslContextFactory {
                // We need to keep them sorted by insertion order, since we want system providers first
                Map<Class<? extends Provider>, Provider> providers = new LinkedHashMap<>();
                for (Provider provider : Security.getProviders()) {
+                  SECURITY.info(provider.getName());
                   providers.put(provider.getClass(), provider);
                }
                for (Provider provider : ServiceFinder.load(Provider.class, classLoader)) {
+                  SECURITY.info(provider.getName());
                   providers.putIfAbsent(provider.getClass(), provider);
                }
                return providers.values().toArray(new Provider[0]);
