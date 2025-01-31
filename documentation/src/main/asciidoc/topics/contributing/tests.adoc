@@ -100,7 +100,7 @@ As soon as the coverage execution command is finished, you will need to generate
 
 For having the report in place, run the following command from your {brandname} home directory:
 
- $ mvn install -pl parent -PjacocoReport
+ $ mvn install -pl all -PjacocoReport
 
 The `jacoco-html/` directory will be generated in {brandname} Home directory, which will contain the code coverage report.
 
