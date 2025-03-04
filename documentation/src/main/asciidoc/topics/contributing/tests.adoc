@@ -106,7 +106,7 @@ The `jacoco/report/` directory will be generated in {brandname} Home directory, 
 
 == Test groups
 Each test should belong to one or more group.
-The group acts as a filter, and is used to select which tests are ran as part of the maven test lifecycle.
+The group acts as a filter, and is used to select which tests are ran as part of the maven test lifecyce.
 
 === Which group should I use?
 The following test groups are used by {brandname}.
