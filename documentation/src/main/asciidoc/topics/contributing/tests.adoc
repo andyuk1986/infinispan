@@ -102,7 +102,7 @@ For having the report in place, run the following command from your {brandname} 
 
  $ mvn install -pl all -PjacocoReport
 
-The `jacoco/report/` directory will be generated in {brandname} Home directory, which will contain the code coverage report.
+The `jacoco/report/` directory will be generated in {brandname} Home directory, which will contain the code coverage report testing.
 
 == Test groups
 Each test should belong to one or more group.
