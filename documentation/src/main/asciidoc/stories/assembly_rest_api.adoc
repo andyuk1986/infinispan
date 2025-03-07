@@ -10,7 +10,7 @@ However, when some operations are processed successfully, they return an HTTP st
 ====
 
 [id='rest_v2_cache_operations']
-== Creating and Managing Caches
+== Creating and Managing Cachessdf
 Create and manage {brandname} caches and perform operations on data hi hi hi.
 
 include::{topics}/ref_rest_caches.adoc[leveloffset=+2]
