@@ -10,7 +10,7 @@ However, when some operations are processed successfully, they return an HTTP ss
 ====
 
 [id='rest_v2_cache_operations']
-== Creating and Managing Cachessdsdsdfdadsasdfs
+== Creating and Managing Cachessdsdsdsdsdfdadsasdfs
 Create and manage {brandname} caches and perform operations on data hi asahi hi.
 
 include::{topics}/ref_rest_caches.adoc[leveloffset=+2]
