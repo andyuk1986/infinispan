@@ -6,7 +6,7 @@ The CLI provides the means for the management of the Raft-backed internal compon
 
 .Prerequisites
 * Start the {brandname} CLI.
-* Connect to a running {brandname} cluster.
+* Connect to a running {brandname} clustertest.
 
 include::{topics}/proc_cli_raft_membership.adoc[leveloffset=+1]
 
