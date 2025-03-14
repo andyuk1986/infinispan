@@ -1,0 +1,19 @@
+name: Keycloak - Scalability benchmark
+
+on:
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    name: Publish Coverage Report
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Add coverage to PR
+        run: |
+          pwd
+          ls -al
