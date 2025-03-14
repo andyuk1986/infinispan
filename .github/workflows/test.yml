@@ -23,3 +23,11 @@ jobs:
         with:
           reports: .github/workflows/jacoco.xml
           targetdir: coveragereport
+
+      - name: Archive jacoco report
+        if: (success() || failure())
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacocoReport
+          path: |
+            coveragereport/
