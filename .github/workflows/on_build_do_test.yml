@@ -327,7 +327,8 @@ jobs:
           mkdir jacoco
           .github/scripts/merge-jacoco-files.sh "$GITHUB_WORKSPACE/test_dir/infinispan/jacoco/" "${GITHUB_WORKSPACE}/surefire-test-report*/"
           #Read and store value of PR from the File
-          echo "PR_NUMBER=$(cat surefire-test-report/pr-number.txt)" >> $GITHUB_ENV
+          PR_NUMBER=$(cat "$GITHUB_WORKSPACE/surefire-test-report/pr-number.txt")
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
       - name: Coverage merge and report generation
         id: coverage_merge
