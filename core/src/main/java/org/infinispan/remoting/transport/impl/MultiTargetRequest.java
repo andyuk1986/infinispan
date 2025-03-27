@@ -116,6 +116,11 @@ public class MultiTargetRequest<T> extends ExclusiveTargetRequest<T> {
          }
          for (int i = 0; i < trackers.length; i++) {
             RequestTracker target = trackers[i];
+            System.out.println(target);
+            System.out.println("hi");
+            System.out.println("hi");
+            System.out.println("hi");
+            System.out.println("hi");
             if (target != null && !members.contains(target.destination())) {
                trackers[i] = null;
                missingResponses--;
