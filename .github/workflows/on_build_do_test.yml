@@ -124,8 +124,12 @@ jobs:
       - name: Archive commit sha PR
         if: >
           (success() || failure())
+        env:
+          PR_NUMBER: ${{ needs.get-info.outputs.pull-request-number }}
+          GITHUB_SHA: ${{ needs.get-info.outputs.source-head-sha }}
         run: |
-           echo -n ${{ needs.get-info.outputs.source-head-sha }} > github-sha.txt
+           echo -n $GITHUB_SHA > github-sha.txt
+           echo -n $PR_NUMBER > pr-number.txt
 
       - name: Archive surefire test report
         if: (success() || failure())
@@ -140,6 +144,7 @@ jobs:
             test_dir/infinispan/**/hs_err_*
             test_dir/infinispan/jacoco/
             github-sha.txt
+            pr-number.txt
 
 # Create artifact with branch name and surefile flaky test report
       - name: Check flaky report existence
@@ -160,7 +165,6 @@ jobs:
           echo -n $TARGET_BRANCH > target-branch.txt
           echo -n $EVENT_NAME > event-name.txt
           echo -n $EVENT_NUMBER > event-number.txt
-          echo -n $PR_NUMBER > pr-number.txt
 
       - name: Archive flaky test report
         if: (success() || failure()) && steps.check_flaky_report.outputs.files_exists == 'true'
@@ -172,7 +176,6 @@ jobs:
             target-branch.txt
             event-name.txt
             event-number.txt
-            pr-number.txt
 
       - name: Archive log files
         if: (success() || failure())
