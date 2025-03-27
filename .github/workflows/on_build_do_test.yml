@@ -339,8 +339,6 @@ jobs:
 
       - name: Add coverage to PR
         id: jacoco
-        env:
-          PR_NUMBER: ${{ env.PR_NUMBER }}
         uses: madrapps/jacoco-report@v1.7.2-beta
         with:
           paths: |
@@ -348,7 +346,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 70
-          pr-number: ${{ PR_NUMBER }}
+          pr-number: ${{ env.PR_NUMBER }}
 
       - name: Archive jacoco report
         if: (success() || failure())
