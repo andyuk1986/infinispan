@@ -301,10 +301,6 @@ jobs:
         with:
           pattern: surefire-test-report*
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: pr-number.txt
-
       - name: Extract Maven Artifacts
         uses: ./.github/actions/extract-maven-artifacts
         with:
@@ -331,7 +327,7 @@ jobs:
           mkdir jacoco
           .github/scripts/merge-jacoco-files.sh "$GITHUB_WORKSPACE/test_dir/infinispan/jacoco/" "${GITHUB_WORKSPACE}/surefire-test-report*/"
           #Read and store value of PR from the File
-          echo "PR_NUMBER=$(cat pr-number.txt)" >> $GITHUB_ENV
+          echo "PR_NUMBER=$(cat surefire-test-report/pr-number.txt)" >> $GITHUB_ENV
 
       - name: Coverage merge and report generation
         id: coverage_merge
