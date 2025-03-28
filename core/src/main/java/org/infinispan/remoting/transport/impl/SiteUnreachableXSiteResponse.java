@@ -30,6 +30,7 @@ public class SiteUnreachableXSiteResponse<T> extends CompletableFuture<T> implem
 
    @Override
    public void whenCompleted(XSiteResponseCompleted xSiteResponseCompleted) {
+      System.out.println("Is completed");
       xSiteResponseCompleted.onCompleted(backup, sendTimeNanos, -1, exception);
    }
 
