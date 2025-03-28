@@ -59,6 +59,8 @@ public abstract class ExclusiveTargetRequest<T> extends AbstractRequest<T> {
    @Override
    public final boolean onNewView(Set<Address> members) {
       if (isDone()) {
+         System.out.println("Is done");
+         System.out.println("Is done");
          return false;
       }
       boolean response;
