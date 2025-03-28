@@ -176,6 +176,7 @@ jobs:
             target-branch.txt
             event-name.txt
             event-number.txt
+            pr-number.txt
 
       - name: Archive log files
         if: (success() || failure())
