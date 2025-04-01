@@ -320,11 +320,12 @@ jobs:
           mv infinispan-${{ steps.dis.outputs.server-version }}-src infinispan
 
       - name: Copy jacoco directories to Infinispan
-        working-directory: test_dir/infinispan
         shell: bash
         # language=bash
         run: |
           mkdir jacoco
+          ls -al
+          pwd
           .github/scripts/merge-jacoco-files.sh "$GITHUB_WORKSPACE/test_dir/infinispan/jacoco/" "${GITHUB_WORKSPACE}/surefire-test-report*/"
           #Read and store value of PR from the File
           PR_NUMBER=$(cat "$GITHUB_WORKSPACE/surefire-test-report/pr-number.txt")
