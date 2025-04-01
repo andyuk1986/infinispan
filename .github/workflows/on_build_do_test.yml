@@ -317,7 +317,7 @@ jobs:
         shell: bash
         # language=bash
         run: |
-          echo ${{ needs.get-info.outputs.source-event }}
+          echo ${{ github.event.workflow_run.conclusion == 'success' && needs.get-info.outputs.source-event == 'pull_request' }}
           mkdir test_dir && cd test_dir
           unzip ${GITHUB_WORKSPACE}/infinispan-${{ steps.dis.outputs.server-version }}-src.zip
           mv infinispan-${{ steps.dis.outputs.server-version }}-src infinispan
@@ -327,8 +327,6 @@ jobs:
         # language=bash
         run: |
           mkdir test_dir/infinispan/jacoco
-          ls -al
-          pwd
           .github/scripts/merge-jacoco-files.sh "$GITHUB_WORKSPACE/test_dir/infinispan/jacoco/" "${GITHUB_WORKSPACE}/surefire-test-report*/"
           #Read and store value of PR from the File
           PR_NUMBER=$(cat "$GITHUB_WORKSPACE/surefire-test-report/pr-number.txt")
