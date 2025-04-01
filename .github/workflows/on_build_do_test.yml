@@ -285,8 +285,8 @@ jobs:
             targetUrl: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   coverage:
-    needs: [ci-build-test-pr, db]
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: [get-info, ci-build-test-pr, db]
+    if: ${{ github.event.workflow_run.conclusion == 'success' && needs.get-info.outputs.source-event == 'pull-request' }}
     name: Publish Coverage Report
     runs-on: ubuntu-latest
     env:
