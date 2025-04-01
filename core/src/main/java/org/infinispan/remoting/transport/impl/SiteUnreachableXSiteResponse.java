@@ -32,6 +32,7 @@ public class SiteUnreachableXSiteResponse<T> extends CompletableFuture<T> implem
    public void whenCompleted(XSiteResponseCompleted xSiteResponseCompleted) {
       System.out.println("hi");
       System.out.println("hi");
+      System.out.println("another hi");
       xSiteResponseCompleted.onCompleted(backup, sendTimeNanos, -1, exception);
    }
 
