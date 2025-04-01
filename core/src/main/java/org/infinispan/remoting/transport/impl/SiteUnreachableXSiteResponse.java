@@ -25,6 +25,7 @@ public class SiteUnreachableXSiteResponse<T> extends CompletableFuture<T> implem
       this.backup = backup;
       this.sendTimeNanos = timeService.time();
       this.exception = CLUSTER.remoteNodeSuspected(new SiteAddress(backup.getSiteName()));
+      System.out.println("hi test");
       completeExceptionally(exception);
    }
 
