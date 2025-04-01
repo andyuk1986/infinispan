@@ -286,7 +286,7 @@ jobs:
 
   coverage:
     needs: [get-info, ci-build-test-pr, db]
-    if: github.event.workflow_run.conclusion == 'success' && needs.get-info.outputs.source-event == 'pull-request'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Publish Coverage Report
     runs-on: ubuntu-latest
     env:
@@ -314,7 +314,10 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: Extract Infinispan Source
+        shell: bash
+        # language=bash
         run: |
+          echo ${{ needs.get-info.outputs.source-event }}
           mkdir test_dir && cd test_dir
           unzip ${GITHUB_WORKSPACE}/infinispan-${{ steps.dis.outputs.server-version }}-src.zip
           mv infinispan-${{ steps.dis.outputs.server-version }}-src infinispan
@@ -323,7 +326,7 @@ jobs:
         shell: bash
         # language=bash
         run: |
-          mkdir jacoco
+          mkdir test_dir/infinispan/jacoco
           ls -al
           pwd
           .github/scripts/merge-jacoco-files.sh "$GITHUB_WORKSPACE/test_dir/infinispan/jacoco/" "${GITHUB_WORKSPACE}/surefire-test-report*/"
