@@ -89,7 +89,7 @@ This file is not fully closed, so to extract the log file, execute:
 When you run tests, you can enable code coverage recorder for calculating and analysing the {brandname} code coverage.
 You can do this using `coverage` and `jacocoReport` profiles. As a code coverage evaluation tool, the JaCoCo is used. While code coverage recording, besides `coverage` profile you should also add the additional jacoco agent library name so that it is attached to containers while running integration tests.
 
- $ mvn test -Pcoverage -Dmaven.test.failure.ignore=true -Dorg.infinispan.test.server.extension.libs=org.jacoco:org.jacoco.agent:0.8.12:runtime
+ $ mvn test -Pcoverage -Dmaven.test.failure.ignore=true -Dorg.infinispan.test.server.extension.libs=org.jacoco:org.jacoco.agent:0.8.13:runtime
 
 Please note, that `-Dmaven.test.failure.ignore=true` is used for generating JaCoCo code coverage report, even if there are test failures.
 
