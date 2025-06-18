@@ -26,7 +26,7 @@ jobs:
 
       - name: Add coverage to PR
         id: jacoco
-        uses: andyuk1986/jacoco-report@eca58efd2af271d65a66ac83cb3d6841c1d26cbb
+        uses: andyuk1986/jacoco-report@anna_fix
         with:
           paths: |
             ${{ github.workspace }}/infinispan/jacoco.xml
