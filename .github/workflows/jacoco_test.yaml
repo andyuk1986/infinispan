@@ -24,6 +24,11 @@ jobs:
       - name: Setup Java
         uses: ./.github/actions/setup-java
 
+      - name: Print current dir
+        run: |
+          ls -al
+          pwd
+
       - name: Add coverage to PR
         id: jacoco
         uses: andyuk1986/jacoco-report@anna_fix
