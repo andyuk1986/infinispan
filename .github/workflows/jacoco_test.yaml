@@ -1,0 +1,37 @@
+name: Jacoco Plugin Test and Fix
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  packages: read
+  # Needed to write commit status
+  statuses: write
+  pull-requests: write
+
+jobs:
+
+  coverage:
+    name: Publish Coverage Report
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: ./.github/actions/setup-java
+
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.7.2
+        with:
+          paths: |
+            ${{ github.workspace }}/infinispan/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 70
+          pr-number: ${{ env.PR_NUMBER }}
+          debug-mode: true
