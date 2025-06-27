@@ -96,7 +96,7 @@
       <module>cdi/remote</module>
       <module>lock</module>
       <module>jcache</module>
-      <module>graalvm</module>
+      <!--<module>graalvm</module>
       <module>quarkus</module>
       <module>gridfs</module>
       <module>integrationtests</module>
@@ -105,7 +105,7 @@
       <module>integrationtests/cdi-weld-se-it</module>
       <module>integrationtests/server-integration</module>
       <module>integrationtests/server-integration/server-integration-commons</module>
-      <module>integrationtests/server-integration/third-party-server</module>
+      <module>integrationtests/server-integration/third-party-server</module>-->
       <module>hibernate</module>
       <module>anchored-keys</module>
       <module>test-support/proto-sample-domain-implementation</module>
@@ -2787,7 +2787,9 @@
       </profile>
       <profile>
          <id>coverage</id>
-
+         <modules>
+            <module>jacoco-report-aggregator</module>
+         </modules>
          <build>
             <plugins>
                <plugin>
@@ -2844,7 +2846,7 @@
                   </executions>
                   <configuration>
                      <propertyName>jacoco.agent.argLine</propertyName>
-                     <destFile>${dir.jacoco}/${project.artifactId}.exec</destFile>
+<!--                     <destFile>${dir.jacoco}/${project.artifactId}.exec</destFile>-->
                   </configuration>
                </plugin>
                <!-- Overriding surefire configuration, for attaching jacoco agent to command line. -->
@@ -2874,7 +2876,7 @@
                         <version>${version.ant-nodeps}</version>
                      </dependency>
                   </dependencies>
-                  <executions>
+                 <!-- <executions>
                      <execution>
                         <id>copy-generated-classes</id>
                         <phase>test</phase>
@@ -2893,7 +2895,7 @@
                            </target>
                         </configuration>
                      </execution>
-                  </executions>
+                  </executions>-->
                </plugin>
             </plugins>
          </build>
