@@ -9,7 +9,6 @@ import static org.infinispan.server.test.core.TestSystemPropertyNames.COVERAGE_E
 import static org.infinispan.server.test.core.TestSystemPropertyNames.INFINISPAN_TEST_SERVER_CONTAINER_ULIMIT;
 import static org.infinispan.server.test.core.TestSystemPropertyNames.INFINISPAN_TEST_SERVER_CONTAINER_VOLUME_REQUIRED;
 import static org.infinispan.server.test.core.TestSystemPropertyNames.INFINISPAN_TEST_SERVER_LOG_FILE;
-import static org.infinispan.server.test.core.TestSystemPropertyNames.JACOCO_REPORTS_DIR;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -427,8 +426,8 @@ public class ContainerInfinispanServerDriver extends AbstractInfinispanServerDri
       }
       String isCoverageEnabled = System.getProperty(COVERAGE_ENABLED);
       if (Boolean.parseBoolean(isCoverageEnabled)) {
-         javaOpts = javaOpts == null ? "-javaagent:/opt/infinispan/server/lib/org.jacoco.agent-0.8.12-runtime.jar=output=file,destfile=" + JACOCO_COVERAGE_CONTAINER_PATH + ",append=true"
-                 : javaOpts + " " + "-javaagent:/opt/infinispan/server/lib/org.jacoco.agent-0.8.12-runtime.jar=output=file,destfile=" + JACOCO_COVERAGE_CONTAINER_PATH + ",append=true";
+         javaOpts = javaOpts == null ? "-javaagent:/opt/infinispan/server/lib/org.jacoco.agent-0.8.13-runtime.jar=output=file,destfile=" + JACOCO_COVERAGE_CONTAINER_PATH + ",append=true"
+                 : javaOpts + " " + "-javaagent:/opt/infinispan/server/lib/org.jacoco.agent-0.8.13-runtime.jar=output=file,destfile=" + JACOCO_COVERAGE_CONTAINER_PATH + ",append=true";
       }
 
       if (javaOpts != null) {
@@ -535,7 +534,7 @@ public class ContainerInfinispanServerDriver extends AbstractInfinispanServerDri
          String isCoverageEnabled = System.getProperty(COVERAGE_ENABLED);
          if (Boolean.parseBoolean(isCoverageEnabled) && !container.isKilled()) {
             //Getting Jacoco Coverage Report after stopping the container
-            container.uploadCoverageInfoToHost(JACOCO_COVERAGE_CONTAINER_PATH, System.getProperty(JACOCO_REPORTS_DIR) + this.name + "-" + server + ".exec");
+            container.uploadCoverageInfoToHost(JACOCO_COVERAGE_CONTAINER_PATH, System.getProperty("project.build.directory") + this.name + "-" + server + ".exec");
          }
          eventually("Container wasn't stopped.", () -> !isRunning(server));
          System.out.printf("[%d] STOP %n", server);
