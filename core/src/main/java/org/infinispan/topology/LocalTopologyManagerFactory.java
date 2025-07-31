@@ -18,6 +18,7 @@ public class LocalTopologyManagerFactory extends AbstractComponentFactory implem
 
    @Override
    public Object construct(String componentName) {
+      System.out.println("This is inside the Core");
       if (globalConfiguration.transport().transport() == null)
          return null;
 
