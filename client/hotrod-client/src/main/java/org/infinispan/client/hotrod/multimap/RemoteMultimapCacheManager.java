@@ -20,6 +20,7 @@ public class RemoteMultimapCacheManager<K, V> implements MultimapCacheManager<K,
 
    @Override
    public RemoteMultimapCache<K, V> get(String cacheName, boolean supportsDuplicates) {
+      System.out.printf("Inside the hotrod client");
       RemoteCache<K, Collection<V>> cache = remoteCacheManager.getCache(cacheName);
       RemoteMultimapCacheImpl<K, V> multimapCache = new RemoteMultimapCacheImpl<>(remoteCacheManager, cache, supportsDuplicates);
       multimapCache.init();
