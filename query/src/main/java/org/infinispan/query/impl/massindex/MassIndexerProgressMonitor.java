@@ -40,6 +40,7 @@ public class MassIndexerProgressMonitor {
 
    public void documentsAdded(long increment) {
       long current = documentsDoneCounter.addAndGet(increment);
+      System.out.println("This is inside the query.");
       if (current == increment) {
          startTime = timeService.time();
       }
