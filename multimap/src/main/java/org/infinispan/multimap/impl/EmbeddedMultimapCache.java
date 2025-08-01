@@ -95,6 +95,7 @@ public class EmbeddedMultimapCache<K, V> implements MultimapCache<K, V> {
    @Override
    public CompletableFuture<Optional<CacheEntry<K, Collection<V>>>> getEntry(K key) {
       requireNonNull(key, "key can't be null");
+      System.out.println("This is another ocmmit.");
       return cache.getAdvancedCache().getCacheEntryAsync(key)
            .thenApply(entry -> {
               if (entry == null)
