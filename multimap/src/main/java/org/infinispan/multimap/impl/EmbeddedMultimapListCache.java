@@ -58,6 +58,7 @@ public class EmbeddedMultimapListCache<K, V> {
     */
    public CompletionStage<Collection<V>> get(K key) {
       requireNonNull(key, ERR_KEY_CAN_T_BE_NULL);
+      System.out.println("This is another print.");
       return getEntry(key).thenApply(entry -> {
          if (entry != null) {
             return entry.getValue();

@@ -76,6 +76,7 @@ public class DistributedExecutorMassIndexer implements Indexer {
 
    @Override
    public CompletionStage<Void> run(Object... keys) {
+      System.out.println("New println");
       authorizer.checkPermission(AuthorizationPermission.ADMIN);
       CompletableFuture<Void> future = null;
       Set<Object> keySet = new HashSet<>();
