@@ -91,6 +91,7 @@ public class RemoteCounterManager implements CounterManager {
 
    private <T> T getOrCreateCounter(String name, Class<T> tClass, Function<String, T> createFunction,
          Supplier<CounterException> invalidCounter) {
+      System.out.println("Another test comm.");
       Object counter = counters.computeIfAbsent(name, createFunction);
       if (!tClass.isInstance(counter)) {
          throw invalidCounter.get();
