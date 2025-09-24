@@ -64,6 +64,7 @@ public final class QueryResponse implements BaseQueryResponse {
       if (projectionSize > 0) {
          unwrappedResults = new ArrayList<>(results.size() / projectionSize);
          Iterator<WrappedMessage> it = results.iterator();
+         System.out.println("anna");
          while (it.hasNext()) {
             Object[] row = new Object[projectionSize];
             for (int i = 0; i < row.length; i++) {
