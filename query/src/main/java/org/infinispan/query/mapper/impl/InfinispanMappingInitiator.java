@@ -59,6 +59,7 @@ public class InfinispanMappingInitiator extends AbstractPojoMappingInitiator<Inf
    public void configure(MappingBuildContext buildContext,
                          MappingConfigurationCollector<PojoTypeMetadataContributor> configurationCollector) {
       System.out.println("ahoooooooooooooooj");
+      System.out.println("second");
       for (ProgrammaticSearchMappingProvider mappingProvider : mappingProviders) {
          mappingProvider.configure(this);
       }
