@@ -46,6 +46,7 @@ public class EvictionManagerImpl<K, V> implements EvictionManager<K, V> {
    }
 
    private void updateEvictionStatistics(Map<K, Map.Entry<K, V>> evicted) {
+      System.out.println("bareeeeev");
       if (cacheMgmtInterceptor != null) {
          cacheMgmtInterceptor.addEvictions(evicted.size());
       } else if (simpleCacheStatsCollector != null) {
