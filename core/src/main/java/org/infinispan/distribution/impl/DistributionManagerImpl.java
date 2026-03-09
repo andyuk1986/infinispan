@@ -55,7 +55,7 @@ public class DistributionManagerImpl implements DistributionManager {
    @SuppressWarnings("unused")
    void start() throws Exception {
       if (log.isTraceEnabled()) log.tracef("starting distribution manager on %s", getAddress());
-
+      System.out.println("bareeeeeeeeeeeeeeeev");
       cacheMode = configuration.clustering().cacheMode();
       // We need an extended topology for preload, before the start of StateTransferManagerImpl
       Address localAddress = transport == null ? Address.LOCAL : transport.getAddress();
