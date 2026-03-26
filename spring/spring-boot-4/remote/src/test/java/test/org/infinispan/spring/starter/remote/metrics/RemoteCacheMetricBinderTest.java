@@ -56,6 +56,14 @@ public class RemoteCacheMetricBinderTest extends CacheMeterBinderCompatibilityKi
       return remoteCacheManager.administration().getOrCreateCache("mycache", stringConfiguration);
    }
 
+   protected void setRemoteCacheManager(RemoteCacheManager remoteCacheManager) {
+      this.remoteCacheManager = remoteCacheManager;
+   }
+
+   protected RemoteCacheManager getRemoteCacheManager() {
+      return this.remoteCacheManager;
+   }
+
    @Test
    void size() {
       // Do nothing
@@ -75,5 +83,6 @@ public class RemoteCacheMetricBinderTest extends CacheMeterBinderCompatibilityKi
    public void dereferenceCache() {
       super.dereferenceCache();
       remoteCacheManager.stop();
+      System.out.println("Called");
    }
 }
