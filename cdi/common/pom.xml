@@ -23,6 +23,11 @@
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -30,7 +35,9 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-               <skipTests>true</skipTests>
+               <parallel combine.self="override"/>
+               <groups combine.self="override"/>
+               <excludedGroups combine.self="override"/>
             </configuration>
          </plugin>
        </plugins>
